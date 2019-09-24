@@ -16,7 +16,7 @@ def dummy_training_function():
     return train
 
 
-def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_dict, config):
+def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_dict, config):
     def train(x):
         G.optim.zero_grad()
         D.optim.zero_grad()
@@ -26,8 +26,6 @@ def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_d
         # How many chunks to split x and y into?
         x = torch.split(x, config['batch_size'])
         counter = 0
-        print(len(x))
-        print(x[0].shape)
 
         # Optionally toggle D and G's "require_grad"
         if config['toggle_grads']:
@@ -45,6 +43,7 @@ def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_d
                 z_.sample_()
                 y_.sample_()
                 ey_.sample_()
+                print(x[counter].shape)
                 D_fake, D_real, D_inv, D_en, _, _ = Decoder(z_[:config['batch_size']], y_[:config['batch_size']],
                                                             x[counter], ey_[counter], train_G=False,
                                                             split_D=config['split_D'])
