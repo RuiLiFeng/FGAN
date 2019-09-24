@@ -15,7 +15,7 @@ import torch.nn as nn
 
 # Import my stuff
 from Metric import inception_utils
-from Utils import utils
+from Utils import utils, vae_utils
 from Training import train_fns
 from sync_batchnorm import patch_replication_callback
 from importlib import import_module
@@ -37,7 +37,7 @@ def run(config):
   if config['resume']:
     print('Skipping initialization for training resumption...')
     config['skip_init'] = True
-  config = utils.update_config_roots(config)
+  config = vae_utils.update_config_roots(config)
   device = 'cuda'
   
   # Seed RNG
