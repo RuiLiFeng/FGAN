@@ -87,7 +87,7 @@ class step(nn.Module):
 
 
 class Invert(nn.Module):
-    def __init__(self, dim_z, depth, is_reverse=True, I_lr=2e-4,
+    def __init__(self, dim_z, I_depth, is_reverse=True, I_lr=2e-4,
                  adam_eps=1e-8, I_B1=0.0, I_B2=0.999, I_mixed_precision=False, name=None):
         """
         Invertible network.
@@ -97,7 +97,7 @@ class Invert(nn.Module):
         """
         super(Invert, self).__init__()
         self._z_dim = dim_z
-        self._depth = depth
+        self._depth = I_depth
         self._is_reverse = is_reverse
         self.steps = []
         self.steps = nn.ModuleList([step(self._z_dim, is_reverse) for _ in range(self._depth)])

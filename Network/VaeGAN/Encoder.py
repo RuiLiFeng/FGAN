@@ -19,7 +19,7 @@ class Encoder_inv(ResNet):
     In further development, this Network will be adopted to the prop of labeled imgs and automatically reform its dept
     -hs.
     """
-    def __init__(self, dim_z, skip_init=False, E_lr=2e-4,
+    def __init__(self, dim_z, skip_init=False, E_lr=2e-4, E_init='ortho',
                  adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None):
         super(Encoder_inv, self).__init__(Bottleneck, [3, 4, 6, 4])
         self.downsample = nn.Sequential(
@@ -31,6 +31,7 @@ class Encoder_inv(ResNet):
         )
         if not skip_init:
             self.init_weights()
+        self.init = E_init
         # Set name used for save and load weights
         self.name = name if name is not None else "Encoder"
 

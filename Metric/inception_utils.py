@@ -20,7 +20,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import Parameter as P
 from torchvision.models.inception import inception_v3
+# FTWS: Import new package for local loading of inception net
+import torchvision.models.inception as inception_torch
+import torch.utils.model_zoo as model_zoo
 
+
+# FTWS: Add INCEPTION_URL to load inception net from local dir
+INCEPTION_URL = 'https://download.pytorch.org/models/inception_v3_google-1a9a5a14.pth'
 
 # Module that wraps the inception network to enable use with dataparallel and
 # returning pool features and logits.
@@ -259,7 +265,10 @@ def accumulate_inception_activations(sample, net, num_inception_images=50000):
 
 # Load and wrap the Inception model
 def load_inception_net(parallel=False):
-  inception_model = inception_v3(pretrained=True, transform_input=False)
+  # FTWS: Enbale load inception net from local dir
+  # inception_model = inception_v3(pretrained=True, transform_input=False)
+  inception_model = inception_torch.Inception3()
+  inception_model.load_state_dict(model_zoo.load_url(url=INCEPTION_URL, model_dir='/gpub/temp/imagenet2012/hdf5'))
   inception_model = WrapInception(inception_model.eval()).cuda()
   if parallel:
     print('Parallelizing Inception module...')

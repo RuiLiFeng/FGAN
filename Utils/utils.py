@@ -58,12 +58,12 @@ def prepare_parser():
   
   ### Model stuff ###
   parser.add_argument(
-    '--model', type=str, default='BigGAN',
+    '--model', type=str, default='VaeGAN.Decoder',
     help='Name of the model module (default: %(default)s)')
   parser.add_argument(
     '--G_param', type=str, default='SN',
     help='Parameterization style to use for G, spectral norm (SN) or SVD (SVD)'
-          ' or None (default: %(default)s)')
+         ' or None (default: %(default)s)')
   parser.add_argument(
     '--D_param', type=str, default='SN',
     help='Parameterization style to use for D, spectral norm (SN) or SVD (SVD)'
@@ -123,6 +123,14 @@ def prepare_parser():
     '--norm_style', type=str, default='bn',
     help='Normalizer style for G, one of bn [batchnorm], in [instancenorm], '
          'ln [layernorm], gn [groupnorm] (default: %(default)s)')
+
+  ### I,E,L model stuff
+  parser.add_argument(
+    '--I_depth', type=int, default=4,
+    help='Number of steps in Invert? (default: %(default)s)')
+  parser.add_argument(
+    '--L_depth', type=int, default=4,
+    help='Number of ResBlocks in LatentBinder? (default: %(default)s)')
          
   ### Model init stuff ###
   parser.add_argument(
@@ -136,6 +144,12 @@ def prepare_parser():
     '--D_init', type=str, default='ortho',
     help='Init style to use for D(default: %(default)s)')
   parser.add_argument(
+    '--E_init', type=str, default='ortho',
+    help='Init style to use for Encoder(default: %(default)s)')
+  parser.add_argument(
+    '--L_init', type=str, default='ortho',
+    help='Init style to use for LatentBinder(default: %(default)s)')
+  parser.add_argument(
     '--skip_init', action='store_true', default=False,
     help='Skip initialization, ideal for testing when ortho init was used '
           '(default: %(default)s)')
@@ -148,17 +162,44 @@ def prepare_parser():
     '--D_lr', type=float, default=2e-4,
     help='Learning rate to use for Discriminator (default: %(default)s)')
   parser.add_argument(
+    '--I_lr', type=float, default=5e-5,
+    help='Learning rate to use for Invert (default: %(default)s)')
+  parser.add_argument(
+    '--E_lr', type=float, default=5e-5,
+    help='Learning rate to use for Encoder (default: %(default)s)')
+  parser.add_argument(
+    '--L_lr', type=float, default=2e-4,
+    help='Learning rate to use for LatentBinder (default: %(default)s)')
+  parser.add_argument(
     '--G_B1', type=float, default=0.0,
     help='Beta1 to use for Generator (default: %(default)s)')
   parser.add_argument(
     '--D_B1', type=float, default=0.0,
     help='Beta1 to use for Discriminator (default: %(default)s)')
   parser.add_argument(
+    '--I_B1', type=float, default=0.0,
+    help='Beta1 to use for Invert (default: %(default)s)')
+  parser.add_argument(
+    '--E_B1', type=float, default=0.0,
+    help='Beta1 to use for Encoder (default: %(default)s)')
+  parser.add_argument(
+    '--L_B1', type=float, default=0.0,
+    help='Beta1 to use for LatentBinder (default: %(default)s)')
+  parser.add_argument(
     '--G_B2', type=float, default=0.999,
     help='Beta2 to use for Generator (default: %(default)s)')
   parser.add_argument(
     '--D_B2', type=float, default=0.999,
     help='Beta2 to use for Discriminator (default: %(default)s)')
+  parser.add_argument(
+    '--I_B2', type=float, default=0.999,
+    help='Beta2 to use for Invert (default: %(default)s)')
+  parser.add_argument(
+    '--E_B2', type=float, default=0.999,
+    help='Beta2 to use for Encoder (default: %(default)s)')
+  parser.add_argument(
+    '--L_B2', type=float, default=0.999,
+    help='Beta2 to use for LatentBinder (default: %(default)s)')
     
   ### Batch size, parallel, and precision stuff ###
   parser.add_argument(
@@ -202,6 +243,18 @@ def prepare_parser():
     help='Train with half-precision activations but fp32 params in G? '
          '(default: %(default)s)')
   parser.add_argument(
+    '--I_mixed_precision', action='store_true', default=False,
+    help='Train with half-precision activations but fp32 params in Invert? '
+         '(default: %(default)s)')
+  parser.add_argument(
+    '--E_mixed_precision', action='store_true', default=False,
+    help='Train with half-precision activations but fp32 params in Encoder? '
+         '(default: %(default)s)')
+  parser.add_argument(
+    '--L_mixed_precision', action='store_true', default=False,
+    help='Train with half-precision activations but fp32 params in LatentBinder? '
+         '(default: %(default)s)')
+  parser.add_argument(
     '--accumulate_stats', action='store_true', default=False,
     help='Accumulate "standing" batchnorm stats? (default: %(default)s)')
   parser.add_argument(
@@ -242,11 +295,11 @@ def prepare_parser():
     help='Use a hash of the experiment name instead of the full config '
          '(default: %(default)s)') 
   parser.add_argument(
-    '--base_root', type=str, default='',
+    '--base_root', type=str, default='/gdata/fengrl/fgan',
     help='Default location to store all weights, samples, data, and logs '
            ' (default: %(default)s)')
   parser.add_argument(
-    '--data_root', type=str, default='data',
+    '--data_root', type=str, default='/gpub/temp/imagenet2012/hdf5',
     help='Default location where data is stored (default: %(default)s)')
   parser.add_argument(
     '--weights_root', type=str, default='weights',
@@ -523,7 +576,9 @@ def get_data_loaders(dataset, data_root=None, augment=False, batch_size=64,
                      num_workers=8, shuffle=True, load_in_mem=False, hdf5=False,
                      pin_memory=True, drop_last=True, start_itr=0,
                      num_epochs=500, use_multiepoch_sampler=False,
+                     index_dir='/gpub/temp/imagenet2012/hdf5',
                      **kwargs):
+  # FTWS: Add index_dir to load index file.
 
   # Append /FILENAME.hdf5 to root if using hdf5
   data_root += '/%s' % root_dict[dataset]
@@ -535,7 +590,7 @@ def get_data_loaders(dataset, data_root=None, augment=False, batch_size=64,
   image_size = imsize_dict[dataset]
   # For image folder datasets, name of the file where we store the precomputed
   # image locations to avoid having to walk the dirs every time we load.
-  dataset_kwargs = {'index_filename': '%s_imgs.npz' % dataset}
+  dataset_kwargs = {'index_filename': '%s/%s_imgs.npz' % (index_dir, dataset)}
   
   # HDF5 datasets have their own inbuilt transform, no need to train_transform  
   if 'hdf5' in dataset:

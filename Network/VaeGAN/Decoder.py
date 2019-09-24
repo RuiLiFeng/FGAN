@@ -68,13 +68,13 @@ class LatentBinder(nn.Module):
     X~Read Data distribution. It will process the latent code: v_inv and v_en produced by Invert Net and Encoder Net,
     through depth layers ResBlock arch, and return logits logits_inv, logits_en to the loss contributor.
     """
-    def __init__(self, latent_dim=120, depth=4, skip_init=False, LatentBinder_init='ortho', L_lr=2e-4,
+    def __init__(self, dim_z=120, L_depth=4, skip_init=False, L_init='ortho', L_lr=2e-4,
                  adam_eps=1e-8, L_B1=0.0, L_B2=0.999, L_mixed_precision=False, name=None):
         super(LatentBinder, self).__init__()
-        self.layers = torch.nn.ModuleList([ResBlock() for _ in range(depth)])
-        self.out = torch.nn.Sequential(torch.nn.Linear(latent_dim, 1),
+        self.layers = torch.nn.ModuleList([ResBlock() for _ in range(L_depth)])
+        self.out = torch.nn.Sequential(torch.nn.Linear(dim_z, 1),
                                        torch.nn.ReLU(inplace=True))
-        self.init = LatentBinder_init
+        self.init = L_init
         if not skip_init:
             self.init_weights()
         self.name = name if name is not None else "LatentBinder"
