@@ -126,7 +126,7 @@ def prepare_parser():
 
   ### I,E,L model stuff
   parser.add_argument(
-    '--I_depth', type=int, default=4,
+    '--I_depth', type=int, default=8,
     help='Number of steps in Invert? (default: %(default)s)')
   parser.add_argument(
     '--L_depth', type=int, default=4,
