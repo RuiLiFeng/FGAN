@@ -43,9 +43,8 @@ def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_d
                 z_.sample_()
                 y_.sample_()
                 ey_.sample_()
-                print(x[counter].shape)
                 D_fake, D_real, D_inv, D_en, _, _ = Decoder(z_[:config['batch_size']], y_[:config['batch_size']],
-                                                            x[counter], ey_[counter], train_G=False,
+                                                            x[counter], ey_[:config['batch_size']], train_G=False,
                                                             split_D=config['split_D'])
 
                 # Compute components of D's loss, average them, and divide by
