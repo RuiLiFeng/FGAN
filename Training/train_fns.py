@@ -30,7 +30,7 @@ def GAN_training_function(G, D, GD, z_, y_, ema, state_dict, config):
     if config['toggle_grads']:
       utils.toggle_grad(D, True)
       utils.toggle_grad(G, False)
-      
+
     for step_index in range(config['num_D_steps']):
       # If accumulating gradients, loop multiple times before an optimizer step
       D.optim.zero_grad()

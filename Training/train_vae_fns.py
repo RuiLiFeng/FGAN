@@ -26,6 +26,8 @@ def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_d
         # How many chunks to split x and y into?
         x = torch.split(x, config['batch_size'])
         counter = 0
+        print(len(x))
+        print(x[0].shape)
 
         # Optionally toggle D and G's "require_grad"
         if config['toggle_grads']:
