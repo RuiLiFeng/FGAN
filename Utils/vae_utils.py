@@ -156,7 +156,7 @@ def prepare_fixed_x(dataloader, G_batch_size, config, experiment_name, device='c
     x, y = dataloader.__iter__().__next__()
     x = x.to(device)
     x = torch.split(x, G_batch_size)[0]
-    if config['fp16']:
+    if config['G_fp16']:
         x = x.half()
     image_filename = '%s/%s/fixed_x.jpg' % (config['samples_root'],
                                             experiment_name)
