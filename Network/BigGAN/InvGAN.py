@@ -21,8 +21,6 @@ class Discriminator(BigGAN.Discriminator):
         self.name = 'D'
 
     def forward(self, x, y=None):
-        if y is not None:
-            raise ValueError("This is the unconditional discriminator, where y must be none, got {}!".format(y))
         # Stick x into h for cleaner for loops without flow control
         h = x
         # Loop over blocks
