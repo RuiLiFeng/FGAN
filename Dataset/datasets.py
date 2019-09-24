@@ -233,7 +233,8 @@ class ILSVRC_HDF5(data.Dataset):
     if self.target_transform is not None:
       target = self.target_transform(target)
     
-    return img, int(target)
+    # return img, int(target)
+    return img, target
 
   def __len__(self):
       return self.num_imgs

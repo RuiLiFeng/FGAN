@@ -104,15 +104,18 @@ def make_anchor(dataloader, anchor_num):
     anchor_list = []
     counter = 0
     label_record = 0
+    print("Generating KNN anchor with %i anchors per class." % anchor_num)
     for index in range(len(dataset)):
         _, label = dataset[index]
         if counter < anchor_num:
             anchor_list.append(index)
             counter += 1
+            print(index)
         elif label != label_record:
             label_record = label
             anchor_list.append(index)
             counter = 1
+            print(anchor_list)
     return dataset[anchor_list]
 
 
