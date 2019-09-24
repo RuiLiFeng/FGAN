@@ -55,7 +55,7 @@ def run(config):
 
     # Next, build the model
     G = model.Generator(**config).to(device)
-    D = model.Generator(**config).to(device)
+    D = model.Discriminator(**config).to(device)
     L = model.LatentBinder(**config).to(device)
     I = Invert.Invert(**config).to(device)
     E = Encoder.Encoder(**config).to(device)
