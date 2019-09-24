@@ -136,7 +136,7 @@ def run(config):
 
     # Prepare inception metrics: FID and IS
     get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'], config['parallel'],
-                                                                      config['no_fid'])
+                                                                      config['data_root'], config['no_fid'])
     # Prepare KNN for evaluating encoder.
     KNN = vae_utils.KNN(loaders[0])
     # Prepare noise and randomly sampled label arrays
