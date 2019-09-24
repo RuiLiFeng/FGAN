@@ -29,9 +29,9 @@ class Encoder_inv(ResNet):
             nn.Linear(dim_z, dim_z),
             nn.ReLU(inplace=True)
         )
+        self.init = E_init
         if not skip_init:
             self.init_weights()
-        self.init = E_init
         # Set name used for save and load weights
         self.name = name if name is not None else "Encoder"
 
