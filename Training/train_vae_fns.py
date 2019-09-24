@@ -44,8 +44,8 @@ def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_d
                 y_.sample_()
                 ey_.sample_()
                 D_fake, D_real, D_inv, D_en, _, _ = Decoder(z_[:config['batch_size']], y_[:config['batch_size']],
-                                                               x[counter], ey_[counter], train_G=False,
-                                                               split_D=config['split_D'])
+                                                            x[counter], ey_[counter], train_G=False,
+                                                            split_D=config['split_D'])
 
                 # Compute components of D's loss, average them, and divide by
                 # the number of gradient accumulations
@@ -87,9 +87,9 @@ def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_d
             ey_.sample_()
             D_fake, _, D_inv, D_en, G_en, reals = Decoder(z_, y_,
                                                           x[counter], ey_, train_G=True, split_D=config['split_D'])
-            G_loss_fake = losses.generator_loss(D_fake)
+            G_loss_fake = losses.generator_loss(D_fake) * config['adv_loss_scale']
             Latent_loss = losses.latent_loss_gen(D_inv, D_en)
-            Recon_loss = losses.recon_loss(G_en, reals) * config['recon_loss_scale']
+            Recon_loss = losses.recon_loss(G_en, reals, config['recon_loss_scale'])
             G_loss = (G_loss_fake + Latent_loss + Recon_loss) / float(config['num_G_accumulations'])
             G_loss.backward()
 

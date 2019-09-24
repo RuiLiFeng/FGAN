@@ -126,8 +126,11 @@ def prepare_parser():
 
   ### I,E,L model stuff
   parser.add_argument(
-    '--recon_loss_scale', type=float, default=0.001,
+    '--recon_loss_scale', type=float, default=0.0001,
     help='Weight of recon_loss in total loss of G? (default: %(default)s)')
+  parser.add_argument(
+    '--adv_loss_scale', type=float, default=0.1,
+    help='Weight of adv_loss in total loss of G? (default: %(default)s)')
   parser.add_argument(
     '--I_depth', type=int, default=8,
     help='Number of steps in Invert? (default: %(default)s)')
