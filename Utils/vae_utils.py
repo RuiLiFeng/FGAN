@@ -153,7 +153,7 @@ def accumulate_standing_stats(net_list, z, y, nclasses, num_accumulations=16):
 
 
 def prepare_fixed_x(dataloader, G_batch_size, config, experiment_name, device='cuda'):
-    x, y = dataloader.__next__()
+    x, y = dataloader.__iter__().__next__()
     x = x.to(device)
     x = torch.split(x, G_batch_size)[0]
     if config['fp16']:
