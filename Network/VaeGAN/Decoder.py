@@ -205,6 +205,7 @@ class Decoder(nn.Module):
             # Get Discriminator output
             D_out = self.D(D_input)
             Dv_out = self.LatentBinder(v_input)
-            return torch.split(D_out, [G_inv.shape[0], x.shape[0]]), \
-                torch.split(Dv_out, [v_inv.shape[0], v_en.shape[0]]), G_en, x
+            D_fake, D_real = torch.split(D_out, [G_inv.shape[0], x.shape[0]])
+            D_inv, D_en = torch.split(Dv_out, [v_inv.shape[0], v_en.shape[0]])
+            return D_fake, D_real, D_inv, D_en, G_en, x
             # D_fake, D_real, D_inv, D_en, G_en, x
