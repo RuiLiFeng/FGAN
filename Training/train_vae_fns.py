@@ -89,7 +89,7 @@ def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_d
                                                           x[counter], ey_, train_G=True, split_D=config['split_D'])
             G_loss_fake = losses.generator_loss(D_fake)
             Latent_loss = losses.latent_loss_gen(D_inv, D_en)
-            Recon_loss = losses.recon_loss(G_en, reals)
+            Recon_loss = losses.recon_loss(G_en, reals) * config['recon_loss_scale']
             G_loss = (G_loss_fake + Latent_loss + Recon_loss) / float(config['num_G_accumulations'])
             G_loss.backward()
 
