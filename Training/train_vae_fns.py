@@ -92,6 +92,7 @@ def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_d
             Recon_loss = losses.recon_loss(G_en, reals, config['recon_loss_scale'])
             G_loss = (G_loss_fake + Latent_loss + Recon_loss) / float(config['num_G_accumulations'])
             G_loss.backward()
+            counter += 1
 
         # Optionally apply modified ortho reg in G
         if config['G_ortho'] > 0.0:
