@@ -88,7 +88,7 @@ class step(nn.Module):
 
 class Invert(nn.Module):
     def __init__(self, dim_z, I_depth, is_reverse=True, I_lr=2e-4,
-                 adam_eps=1e-8, I_B1=0.0, I_B2=0.999, I_mixed_precision=False, name=None):
+                 adam_eps=1e-8, I_B1=0.0, I_B2=0.999, I_mixed_precision=False, name=None, **kwargs):
         """
         Invertible network.
         :param dim_z: Must be int.

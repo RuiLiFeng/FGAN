@@ -69,7 +69,7 @@ class LatentBinder(nn.Module):
     through depth layers ResBlock arch, and return logits logits_inv, logits_en to the loss contributor.
     """
     def __init__(self, dim_z=120, L_depth=4, skip_init=False, L_init='ortho', L_lr=2e-4,
-                 adam_eps=1e-8, L_B1=0.0, L_B2=0.999, L_mixed_precision=False, name=None):
+                 adam_eps=1e-8, L_B1=0.0, L_B2=0.999, L_mixed_precision=False, name=None, **kwargs):
         super(LatentBinder, self).__init__()
         self.layers = torch.nn.ModuleList([ResBlock() for _ in range(L_depth)])
         self.out = torch.nn.Sequential(torch.nn.Linear(dim_z, 1),

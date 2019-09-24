@@ -20,7 +20,7 @@ class Encoder_inv(ResNet):
     -hs.
     """
     def __init__(self, dim_z, skip_init=False, E_lr=2e-4, E_init='ortho',
-                 adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None):
+                 adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None, **kwargs):
         super(Encoder_inv, self).__init__(Bottleneck, [3, 4, 6, 4])
         self.downsample = nn.Sequential(
             nn.Conv2d(512 * 4, dim_z, kernel_size=1, stride=1, bias=False),
@@ -88,7 +88,7 @@ class Encoder_inv(ResNet):
 
 class Encoder_rd(ResNet):
     def __init__(self, dim_z, skip_init=False, E_lr=2e-4,
-                 adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None):
+                 adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None, **kwargs):
         super(Encoder_rd, self).__init__(Bottleneck, [3, 4, 6, 4])
         self.resblock1 = ResBlock(512 * 4, dim_z * 2)
         self.resblock2 = ResBlock(dim_z * 2, dim_z * 2)
