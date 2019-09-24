@@ -158,6 +158,8 @@ def prepare_fixed_x(dataloader, G_batch_size, config, experiment_name, device='c
     x = torch.split(x, G_batch_size)[0]
     if config['G_fp16']:
         x = x.half()
+    if not os.path.isdir('%s/%s' % (config['samples_root'], experiment_name)):
+        os.mkdir('%s/%s' % (config['samples_root'], experiment_name))
     image_filename = '%s/%s/fixed_x.jpg' % (config['samples_root'],
                                             experiment_name)
     torchvision.utils.save_image(x.float().cpu(), image_filename,
