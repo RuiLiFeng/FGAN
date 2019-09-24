@@ -67,7 +67,7 @@ def run(config):
                                                     'no_optim': True}).to(device)
         iema = utils.ema(Decoder.Invert, I_ema, config['ema_decay'], config['ema_start'])
         print('Preparing EMA for Encoder with decay of {}'.format(config['ema_decay']))
-        E_ema = model.Generator(name='Encoder_ema', **{**config, 'skip_init': True,
+        E_ema = model.Encoder(name='Encoder_ema', **{**config, 'skip_init': True,
                                                        'no_optim': True}).to(device)
         eema = utils.ema(Decoder.Encoder, E_ema, config['ema_decay'], config['ema_start'])
     else:
