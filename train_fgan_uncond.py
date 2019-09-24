@@ -47,7 +47,7 @@ def run(config):
     torch.backends.cudnn.benchmark = True
 
     # Import the model--this line allows us to dynamically select different files.
-    model = __import__('Network.' + config['model'])
+    model = __import__('Network.' + config['model'], fromlist=['Generator'])
     experiment_name = (config['experiment_name'] if config['experiment_name']
                        else utils.name_from_config(config))
     print('Experiment name is %s' % experiment_name)
