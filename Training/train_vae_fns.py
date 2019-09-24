@@ -16,29 +16,29 @@ def dummy_training_function():
     return train
 
 
-def VAE_training_function(Decoder, z_, y_, ey_, ema_list, state_dict, config):
+def VAE_training_function(G, D, E, I ,L, Decoder, z_, y_, ey_, ema_list, state_dict, config):
     def train(x):
-        Decoder.G.optim.zero_grad()
-        Decoder.D.optim.zero_grad()
-        Decoder.Invert.optim.zero_grad()
-        Decoder.Encoder.optim.zero_grad()
-        Decoder.LatentBinder.optim.zero_grad()
+        G.optim.zero_grad()
+        D.optim.zero_grad()
+        I.optim.zero_grad()
+        E.optim.zero_grad()
+        L.optim.zero_grad()
         # How many chunks to split x and y into?
         x = torch.split(x, config['batch_size'])
         counter = 0
 
         # Optionally toggle D and G's "require_grad"
         if config['toggle_grads']:
-            utils.toggle_grad(Decoder.D, True)
-            utils.toggle_grad(Decoder.LatentBinder, True)
-            utils.toggle_grad(Decoder.G, False)
-            utils.toggle_grad(Decoder.Invert, False)
-            utils.toggle_grad(Decoder.Encoder, False)
+            utils.toggle_grad(D, True)
+            utils.toggle_grad(L, True)
+            utils.toggle_grad(G, False)
+            utils.toggle_grad(I, False)
+            utils.toggle_grad(E, False)
 
         for step_index in range(config['num_D_steps']):
             # If accumulating gradients, loop multiple times before an optimizer step
-            Decoder.D.optim.zero_grad()
-            Decoder.LatentBinder.optim.zero_grad()
+            D.optim.zero_grad()
+            L.optim.zero_grad()
             for accumulation_index in range(config['num_D_accumulations']):
                 z_.sample_()
                 y_.sample_()
@@ -60,24 +60,24 @@ def VAE_training_function(Decoder, z_, y_, ey_, ema_list, state_dict, config):
             if config['D_ortho'] > 0.0:
                 # Debug print to indicate we're using ortho reg in D.
                 print('using modified ortho reg in D and Latent_Binder')
-                utils.ortho(Decoder.D, config['D_ortho'])
-                utils.ortho(Decoder.LatentBinder, config['Latent_Binder_ortho'])
+                utils.ortho(D, config['D_ortho'])
+                utils.ortho(L, config['L_ortho'])
 
-            Decoder.D.optim.step()
-            Decoder.LatentBinder.optim.step()
+            D.optim.step()
+            L.optim.step()
 
         # Optionally toggle "requires_grad"
         if config['toggle_grads']:
-            utils.toggle_grad(Decoder.D, False)
-            utils.toggle_grad(Decoder.LatentBinder, False)
-            utils.toggle_grad(Decoder.G, True)
-            utils.toggle_grad(Decoder.Invert, True)
-            utils.toggle_grad(Decoder.Encoder, True)
+            utils.toggle_grad(D, False)
+            utils.toggle_grad(L, False)
+            utils.toggle_grad(G, True)
+            utils.toggle_grad(I, True)
+            utils.toggle_grad(E, True)
 
         # Zero G's gradients by default before training G, for safety
-        Decoder.G.optim.zero_grad()
-        Decoder.Invert.optim.zero_grad()
-        Decoder.Encoder.optimz.zero_grad()
+        G.optim.zero_grad()
+        I.optim.zero_grad()
+        E.optimz.zero_grad()
         counter = 0
 
         # If accumulating gradients, loop multiple times
@@ -98,15 +98,13 @@ def VAE_training_function(Decoder, z_, y_, ey_, ema_list, state_dict, config):
             print('using modified ortho reg in G, Invert, and Encoder')
             # Debug print to indicate we're using ortho reg in G
             # Don't ortho reg shared, it makes no sense. Really we should blacklist any embeddings for this
-            utils.ortho(Decoder.G, config['G_ortho'],
-                        blacklist=[param for param in Decoder.G.shared.parameters()])
-            utils.ortho(Decoder.Encoder, config['Encoder_ortho'],
-                        blacklist=[param for param in Decoder.G.shared.parameters()])
-            utils.ortho(Decoder.Invert, config['Invert_ortho'],
-                        blacklist=[param for param in Decoder.G.shared.parameters()])
-        Decoder.G.optim.step()
-        Decoder.Invert.optim.step()
-        Decoder.Encoder.optim.step()
+            utils.ortho(G, config['G_ortho'],
+                        blacklist=[param for param in G.shared.parameters()])
+            utils.ortho(E, config['E_ortho'])
+            utils.ortho(I, config['I_ortho'])
+        G.optim.step()
+        I.optim.step()
+        E.optim.step()
 
         # If we have an ema, update it, regardless of if we test with it or not
         if config['ema']:
@@ -120,7 +118,6 @@ def VAE_training_function(Decoder, z_, y_, ey_, ema_list, state_dict, config):
                'Recon_loss': float(Recon_loss.item())}
         # Return G's loss and the components of D's loss.
         return out
-
     return train
 
 
@@ -130,14 +127,14 @@ def VAE_training_function(Decoder, z_, y_, ey_, ema_list, state_dict, config):
     a set of full conditional sample sheets, and a set of interp sheets. '''
 
 
-def save_and_sample(Decoder, G_ema, I_ema, E_ema, z_, y_, fixed_z, fixed_y, fixed_x,
+def save_and_sample(G, D, E, I ,L , G_ema, I_ema, E_ema, z_, y_, fixed_z, fixed_y, fixed_x,
                     state_dict, config, experiment_name):
-    vae_utils.save_weights([Decoder], state_dict, config['weights_root'],
+    vae_utils.save_weights([G, D, E, I, L], state_dict, config['weights_root'],
                            experiment_name, None, [G_ema, I_ema, E_ema] if config['ema'] else None)
     # Save an additional copy to mitigate accidental corruption if process
     # is killed during a save (it's happened to me before -.-)
     if config['num_save_copies'] > 0:
-        vae_utils.save_weights(Decoder, state_dict, config['weights_root'],
+        vae_utils.save_weights([G, D, E, I, L], state_dict, config['weights_root'],
                                experiment_name,
                                'copy%d' % state_dict['save_num'],
                                [G_ema, I_ema, E_ema] if config['ema'] else None)
@@ -147,7 +144,7 @@ def save_and_sample(Decoder, G_ema, I_ema, E_ema, z_, y_, fixed_z, fixed_y, fixe
     if config['ema'] and config['use_ema']:
         which_G, which_E, which_I = G_ema, E_ema, I_ema
     else:
-        which_G, which_E, which_I = Decoder.G, Decoder.E, Decoder.I
+        which_G, which_E, which_I = G, E, I
 
     # Accumulate standing statistics?
     if config['accumulate_stats']:
@@ -208,12 +205,12 @@ def save_and_sample(Decoder, G_ema, I_ema, E_ema, z_, y_, fixed_z, fixed_y, fixe
     improvement. '''
 
 
-def test(Decoder, KNN, G_ema, I_ema, E_ema, z_, y_, state_dict, config, sample, get_inception_metrics,
+def test(G, D, E, I, L, KNN, G_ema, I_ema, E_ema, z_, y_, state_dict, config, sample, get_inception_metrics,
          experiment_name, test_log):
     print('Gathering inception metrics...')
     if config['accumulate_stats']:
         vae_utils.accumulate_standing_stats([G_ema, I_ema, E_ema] if config['ema'] and config['use_ema'] else
-                                            [Decoder.G, Decoder.Invert, Decoder.Encoder],
+                                            [G, I, E],
                                             z_, y_, config['n_classes'],
                                             config['num_standing_accumulations'])
     IS_mean, IS_std, FID = get_inception_metrics(sample,
@@ -225,13 +222,13 @@ def test(Decoder, KNN, G_ema, I_ema, E_ema, z_, y_, state_dict, config, sample, 
     if ((config['which_best'] == 'IS' and IS_mean > state_dict['best_IS'])
             or (config['which_best'] == 'FID' and FID < state_dict['best_FID'])):
         print('%s improved over previous best, saving checkpoint...' % config['which_best'])
-        vae_utils.save_weights([Decoder], state_dict, config['weights_root'],
+        vae_utils.save_weights([G, D, E, I, L], state_dict, config['weights_root'],
                                experiment_name, 'best%d' % state_dict['save_best_num'],
                                G_ema if config['ema'] else None)
         state_dict['save_best_num'] = (state_dict['save_best_num'] + 1) % config['num_best_copies']
     state_dict['best_IS'] = max(state_dict['best_IS'], IS_mean)
     state_dict['best_FID'] = min(state_dict['best_FID'], FID)
-    KNN_precision = KNN(E_ema if config['ema'] and config['use_ema'] else Decoder.Encoder)
+    KNN_precision = KNN(E_ema if config['ema'] and config['use_ema'] else E)
     # Log results to file
     test_log.log(itr=int(state_dict['itr']), IS_mean=float(IS_mean),
                  IS_std=float(IS_std), FID=float(FID), KNN_precision=float(KNN_precision))

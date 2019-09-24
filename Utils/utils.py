@@ -372,6 +372,15 @@ def prepare_parser():
     '--D_ortho', type=float, default=0.0,
     help='Modified ortho reg coefficient in D (default: %(default)s)')
   parser.add_argument(
+    '--E_ortho', type=float, default=0.0,  # 1e-4 is default for BigGAN
+    help='Modified ortho reg coefficient in E(default: %(default)s)')
+  parser.add_argument(
+    '--I_ortho', type=float, default=0.0,
+    help='Modified ortho reg coefficient in I (default: %(default)s)')
+  parser.add_argument(
+    '--L_ortho', type=float, default=0.0,
+    help='Modified ortho reg coefficient in L (default: %(default)s)')
+  parser.add_argument(
     '--toggle_grads', action='store_true', default=True,
     help='Toggle D and G''s "requires_grad" settings when not training them? '
          ' (default: %(default)s)')

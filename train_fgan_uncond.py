@@ -54,22 +54,27 @@ def run(config):
     print('Experiment name is %s' % experiment_name)
 
     # Next, build the model
-    Decoder = model.Decoder(**config).to(device)
+    G = model.Generator(**config).to(device)
+    D = model.Generator(**config).to(device)
+    L = model.LatentBinder(**config).to(device)
+    I = Invert.Invert(**config).to(device)
+    E = Encoder.Encoder(**config).to(device)
+    Decoder = model.Decoder(I, E, G, D, L).to(device)
 
     # If using EMA, prepare it
     if config['ema']:
         print('Preparing EMA for G with decay of {}'.format(config['ema_decay']))
         G_ema = model.Generator(name='G_ema', **{**config, 'skip_init': True,
                                                  'no_optim': True}).to(device)
-        gema = utils.ema(Decoder.G, G_ema, config['ema_decay'], config['ema_start'])
+        gema = utils.ema(G, G_ema, config['ema_decay'], config['ema_start'])
         print('Preparing EMA for Invert with decay of {}'.format(config['ema_decay']))
         I_ema = Invert.Invert(name='Invert_ema', **{**config, 'skip_init': True,
                                                     'no_optim': True}).to(device)
-        iema = utils.ema(Decoder.Invert, I_ema, config['ema_decay'], config['ema_start'])
+        iema = utils.ema(I, I_ema, config['ema_decay'], config['ema_start'])
         print('Preparing EMA for Encoder with decay of {}'.format(config['ema_decay']))
         E_ema = Encoder.Encoder(name='Encoder_ema', **{**config, 'skip_init': True,
                                                        'no_optim': True}).to(device)
-        eema = utils.ema(Decoder.Encoder, E_ema, config['ema_decay'], config['ema_start'])
+        eema = utils.ema(E, E_ema, config['ema_decay'], config['ema_start'])
     else:
         G_ema, gema, I_ema, iema, E_ema, eema = None, None, None, None, None, None
 
@@ -77,22 +82,20 @@ def run(config):
     # not implement this.
     if config['G_fp16']:
         print('Casting G to float16...')
-        Decoder.G = Decoder.G.half()
+        G = G.half()
         if config['ema']:
             G_ema = G_ema.half()
     if config['D_fp16']:
         print('Casting D to fp16...')
-        Decoder.D = Decoder.D.half()
+        D = D.half()
         # Consider automatically reducing SN_eps?
-    print(Decoder.G)
-    print(Decoder.D)
-    print(Decoder.Invert)
-    print(Decoder.Encoder)
-    print(Decoder.LatentBinder)
+    print(G)
+    print(D)
+    print(I)
+    print(E)
+    print(L)
     print('Number of params in G: {} D: {} Invert: {} Encoder: {} LatentBinder: {}'.format(
-        *[sum([p.data.nelement() for p in net.parameters()]) for net in [Decoder.G, Decoder.D,
-                                                                         Decoder.Invert, Decoder.Encoder,
-                                                                         Decoder.LatentBinder]]))
+        *[sum([p.data.nelement() for p in net.parameters()]) for net in [G, D, I, E, L]]))
     # Prepare state dict, which holds things like epoch # and itr #
     state_dict = {'itr': 0, 'epoch': 0, 'save_num': 0, 'save_best_num': 0,
                   'best_IS': 0, 'best_FID': 999999, 'config': config}
@@ -100,7 +103,7 @@ def run(config):
     # If loading from a pre-trained model, load weights
     if config['resume']:
         print('Loading weights...')
-        vae_utils.load_weights([Decoder], state_dict,
+        vae_utils.load_weights([G, D, I, E, L], state_dict,
                                config['weights_root'], experiment_name,
                                config['load_weights'] if config['load_weights'] else None,
                                [G_ema, I_ema, E_ema] if config['ema'] else None)
@@ -142,13 +145,13 @@ def run(config):
     # Prepare noise and randomly sampled label arrays
     # Allow for different batch sizes in G
     G_batch_size = max(config['G_batch_size'], config['batch_size'])
-    z_, y_ = utils.prepare_z_y(G_batch_size, Decoder.G.dim_z, config['n_classes'],
+    z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
                                device=device, fp16=config['G_fp16'])
     # Prepare fake labels for encoder.
-    _, ey_ = utils.prepare_z_y(G_batch_size, Decoder.G.dim_z, config['n_classes'],
+    _, ey_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
                                device=device, fp16=config['G_fp16'])
     # Prepare a fixed z & y to see individual sample evolution throghout training
-    fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, Decoder.G.dim_z,
+    fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
                                          config['n_classes'], device=device,
                                          fp16=config['G_fp16'])
     fixed_x = vae_utils.prepare_fixed_x(loaders[0], G_batch_size, config, experiment_name, device)
@@ -156,16 +159,16 @@ def run(config):
     fixed_y.sample_()
     # Loaders are loaded, prepare the training function
     if config['which_train_fn'] == 'GAN':
-        train = train_vae_fns.VAE_training_function(Decoder, z_, y_, ey_,
+        train = train_vae_fns.VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_,
                                                     [gema, iema, eema], state_dict, config)
     # Else, assume debugging and use the dummy train fn
     else:
         train = train_vae_fns.dummy_training_function()
     # Prepare Sample function for use with inception metrics
     sample = functools.partial(vae_utils.sample, Invert=(I_ema if config['ema'] and config['use_ema']
-                                                         else Decoder.Invert),
+                                                         else I),
                                G=(G_ema if config['ema'] and config['use_ema']
-                                  else Decoder.G),
+                                  else G),
                                z_=z_, y_=y_, config=config)
 
     print('Beginning training at epoch %d...' % state_dict['epoch'])
@@ -181,7 +184,11 @@ def run(config):
             state_dict['itr'] += 1
             # Make sure G and D are in training mode, just in case they got set to eval
             # For D, which typically doesn't have BN, this shouldn't matter much.
-            Decoder.train()
+            G.train()
+            D.train()
+            I.train()
+            E.train()
+            L.train()
             if config['ema']:
                 G_ema.train()
                 I_ema.train()
@@ -196,9 +203,9 @@ def run(config):
             # Every sv_log_interval, log singular values
             if (config['sv_log_interval'] > 0) and (not (state_dict['itr'] % config['sv_log_interval'])):
                 train_log.log(itr=int(state_dict['itr']),
-                              **{**utils.get_SVs(Decoder.G, 'G'), **utils.get_SVs(Decoder.D, 'D'),
-                                 **utils.get_SVs(Decoder.Invert, 'Invert'), **utils.get_SVs(Decoder.Encoder, 'Encoder'),
-                                 **utils.get_SVs(Decoder.LatentBinder, 'LatentBinder')})
+                              **{**utils.get_SVs(G, 'G'), **utils.get_SVs(D, 'D'),
+                                 **utils.get_SVs(I, 'Invert'), **utils.get_SVs(E, 'Encoder'),
+                                 **utils.get_SVs(L, 'LatentBinder')})
 
             # If using my progbar, print metrics.
             if config['pbar'] == 'mine':
@@ -210,20 +217,24 @@ def run(config):
             if not (state_dict['itr'] % config['save_every']):
                 if config['G_eval_mode']:
                     print('Switchin G to eval mode...')
-                    Decoder.eval()
+                    G.eval()
+                    I.eval()
+                    E.eval()
                     if config['ema']:
                         G_ema.eval()
                         I_ema.eval()
                         E_ema.eval()
-                train_vae_fns.save_and_sample(Decoder, G_ema, I_ema, E_ema, z_, y_, fixed_z, fixed_y, fixed_x,
+                train_vae_fns.save_and_sample(G, D, E, I, L, G_ema, I_ema, E_ema, z_, y_, fixed_z, fixed_y, fixed_x,
                                               state_dict, config, experiment_name)
 
             # Test every specified interval
             if not (state_dict['itr'] % config['test_every']):
                 if config['G_eval_mode']:
                     print('Switchin G to eval mode...')
-                    Decoder.eval()
-                train_vae_fns.test(Decoder, KNN, G_ema, I_ema, E_ema, z_, y_, state_dict, config, sample,
+                    G.eval()
+                    I.eval()
+                    E.eval()
+                train_vae_fns.test(G, D, E, I, L, KNN, G_ema, I_ema, E_ema, z_, y_, state_dict, config, sample,
                                    get_inception_metrics, experiment_name, test_log)
         # Increment epoch counter at end of epoch
         state_dict['epoch'] += 1

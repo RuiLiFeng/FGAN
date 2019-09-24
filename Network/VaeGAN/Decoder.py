@@ -157,13 +157,13 @@ class Decoder(nn.Module):
     3. Add a regularize term to the final loss to bond Invert(Z) and Encoder(X)
     4. Add a individual discriminator to distinguish Invert(Z) and Encoder(X)
     """
-    def __init__(self, name=None, **kwargs):
+    def __init__(self, I, E, G, D, L, name=None, **kwargs):
         super(Decoder, self).__init__()
-        self.Invert = Invert.Invert(**kwargs)
-        self.Encoder = Encoder.Encoder(**kwargs)
-        self.G = Generator(**kwargs)
-        self.D = Discriminator(**kwargs)
-        self.LatentBinder = LatentBinder(**kwargs)
+        self.Invert = I
+        self.Encoder = E
+        self.G = G
+        self.D = D
+        self.LatentBinder = L
         self.name = name if name is not None else "Decoder"
 
     def forward(self, z, iy, x, ey, train_G=False, split_D=False):
