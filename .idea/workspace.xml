@@ -39,8 +39,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-743">
-              <caret line="197" column="17" lean-forward="true" selection-start-line="197" selection-start-column="17" selection-end-line="197" selection-end-column="17" />
+            <state relative-caret-position="310">
+              <caret line="56" column="44" lean-forward="true" selection-start-line="56" selection-start-column="44" selection-end-line="56" selection-end-column="44" />
               <folding>
                 <element signature="e#65#81#0" expanded="true" />
               </folding>
@@ -120,8 +120,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="16" selection-start-line="16" selection-end-line="16" />
+            <state relative-caret-position="351">
+              <caret line="211" column="12" lean-forward="true" selection-start-line="211" selection-start-column="12" selection-end-line="211" selection-end-column="12" />
               <folding>
                 <element signature="e#61#77#0" expanded="true" />
               </folding>
@@ -179,8 +179,8 @@
         <option value="$PROJECT_DIR$/Training/train_fns.py" />
         <option value="$PROJECT_DIR$/train_fgan_uncond.py" />
         <option value="$PROJECT_DIR$/Training/train_vae_fns.py" />
-        <option value="$PROJECT_DIR$/Network/VaeGAN/Decoder.py" />
         <option value="$PROJECT_DIR$/Utils/vae_utils.py" />
+        <option value="$PROJECT_DIR$/Network/VaeGAN/Decoder.py" />
       </list>
     </option>
   </component>
@@ -277,15 +277,16 @@
       <workItem from="1569078687493" duration="67793000" />
       <workItem from="1569379083101" duration="1100000" />
       <workItem from="1569417497294" duration="375000" />
-      <workItem from="1569417878487" duration="1385000" />
+      <workItem from="1569417878487" duration="3240000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="75863000" />
+    <option name="totallyTimeSpent" value="77718000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1513" height="973" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20315717" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -501,16 +502,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
-          <folding>
-            <element signature="e#61#77#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2885">
@@ -531,10 +522,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="211" column="12" lean-forward="true" selection-start-line="211" selection-start-column="12" selection-end-line="211" selection-end-column="12" />
+          <folding>
+            <element signature="e#61#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-743">
-          <caret line="197" column="17" lean-forward="true" selection-start-line="197" selection-start-column="17" selection-end-line="197" selection-end-column="17" />
+        <state relative-caret-position="310">
+          <caret line="56" column="44" lean-forward="true" selection-start-line="56" selection-start-column="44" selection-end-line="56" selection-end-column="44" />
           <folding>
             <element signature="e#65#81#0" expanded="true" />
           </folding>

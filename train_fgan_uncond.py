@@ -37,6 +37,9 @@ def run(config):
         config['skip_init'] = True
     config = vae_utils.update_config_roots(config)
     device = 'cuda'
+    device1 = 'cuda:1'
+    device2 = 'cuda:2'
+    device3 = 'cuda:3'
 
     # Seed RNG
     utils.seed_rng(config['seed'])
@@ -54,11 +57,11 @@ def run(config):
     print('Experiment name is %s' % experiment_name)
 
     # Next, build the model
-    G = model.Generator(**config).to(device)
-    D = model.Discriminator(**config).to(device)
-    L = model.LatentBinder(**config).to(device)
-    I = Invert.Invert(**config).to(device)
-    E = Encoder.Encoder(**config).to(device)
+    G = model.Generator(**config).to(device1)
+    D = model.Discriminator(**config).to(device1)
+    L = model.LatentBinder(**config).to(device1)
+    I = Invert.Invert(**config).to(device2)
+    E = Encoder.Encoder(**config).to(device2)
     Decoder = model.Decoder(I, E, G, D, L).to(device)
 
     # If using EMA, prepare it
