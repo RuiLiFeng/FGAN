@@ -77,7 +77,7 @@ def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_d
         # Zero G's gradients by default before training G, for safety
         G.optim.zero_grad()
         I.optim.zero_grad()
-        E.optimz.zero_grad()
+        E.optim.zero_grad()
         counter = 0
 
         # If accumulating gradients, loop multiple times
