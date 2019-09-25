@@ -117,6 +117,12 @@ def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_d
                'D_loss_fake': float(D_loss_fake.item()),
                'Latent_loss': float(Latent_loss.item()),
                'Recon_loss': float(Recon_loss.item())}
+        
+        # Release GPU memory:
+        del G_loss, D_loss_real, D_loss_fake, Latent_loss, Recon_loss
+        del D_fake, D_real, D_inv, D_en, G_en, reals
+        del x
+        
         # Return G's loss and the components of D's loss.
         return out
     return train

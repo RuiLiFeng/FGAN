@@ -83,19 +83,21 @@ class KNN(object):
         """
         anchor_v = encoder(self.anchor).split(1, 0)
         precision = 0
-        for i, (x, y) in enumerate(self.dataloader):
-            if i > self.sample_batch:
-                break
-            v = encoder(x)
-            dist = []
-            for anchor in anchor_v:
-                dist.append(torch.norm(v - anchor, 2, 1, keepdim=True))
-            dist = torch.cat(dist, 1)    # [batch_size, anchor_num]
-            y_arg = dist.argsort(1)
-            for k in range(self.K):
-                y_ = self.anchor_label[y_arg[:, k]]
-                precision += 1.0 * (y_ == y) / y.shape[0]
-            precision = precision / self.K
+        with torch.no_grad:
+            for i, (x, y) in enumerate(self.dataloader):
+                if i > self.sample_batch:
+                    break
+                v = encoder(x)
+                dist = []
+                for anchor in anchor_v:
+                    dist.append(torch.norm(v - anchor, 2, 1, keepdim=True))
+                dist = torch.cat(dist, 1)    # [batch_size, anchor_num]
+                y_arg = dist.argsort(1)
+                for k in range(self.K):
+                    y_ = self.anchor_label[y_arg[:, k]]
+                    precision += 1.0 * (y_ == y) / y.shape[0]
+                precision = float(precision / self.K)
+            del x, y, v
         return precision / self.sample_batch
 
 
