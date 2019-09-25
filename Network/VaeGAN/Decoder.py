@@ -198,7 +198,7 @@ class Decoder(nn.Module):
             D_real = self.D(x)
             D_inv = self.LatentBinder(v_inv)
             D_en = self.LatentBinder(v_en)
-            del G_en, G_inv, v_en, v_inv
+            del G_inv, v_en, v_inv
             return D_fake, D_real, D_inv, D_en, G_en, x
         else:
             D_input = torch.cat([G_inv, x], 0)
@@ -208,7 +208,7 @@ class Decoder(nn.Module):
             Dv_out = self.LatentBinder(v_input)
             D_fake, D_real = torch.split(D_out, [G_inv.shape[0], x.shape[0]])
             D_inv, D_en = torch.split(Dv_out, [v_inv.shape[0], v_en.shape[0]])
-            del G_en, G_inv, v_en, v_inv, D_input, v_input, D_out, Dv_out
+            del G_inv, v_en, v_inv, D_input, v_input, D_out, Dv_out
             
             return D_fake, D_real, D_inv, D_en, G_en, x
             # D_fake, D_real, D_inv, D_en, G_en, x
