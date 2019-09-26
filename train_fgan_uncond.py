@@ -14,7 +14,7 @@ from Utils import utils
 from Training import train_fns
 from Training import train_vae_fns
 from sync_batchnorm import patch_replication_callback
-from Utils import vae_utils
+from Utils import vae_utils, parallel_utils
 from Network.VaeGAN import Invert, Encoder
 from importlib import import_module
 from Metric.vggutils import load_vgg_from_local
@@ -114,7 +114,9 @@ def run(config):
 
     # If parallel, parallelize the GD module
     if config['parallel']:
-        Decoder = nn.DataParallel(Decoder)
+        # Decoder = nn.DataParallel(Decoder)
+        # Using custom dataparallel to save GPU memory
+        Decoder = parallel_utils.DataParallelModel(Decoder)
         if config['cross_replica']:
             patch_replication_callback(Decoder)
 
