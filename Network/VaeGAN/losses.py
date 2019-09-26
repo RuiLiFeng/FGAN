@@ -33,10 +33,11 @@ def loss_hinge_gen(dis_fake):
 
 def loss_hinge_recon(fakes, reals, r_loss_scale=0.001):
     vgg = load_vgg_from_local()
-    pixel_err = torch.mean(F.mse_loss(fakes, reals, reduce=False), [index for index in fakes.shape[1:]])
+    pixel_err = torch.mean(F.mse_loss(fakes, reals, reduce=False), [index for index in range(1, len(fakes.shape[1:]))])
     fakes_vgg = vgg(fakes)
     reals_vgg = vgg(reals)
-    vgg_err = torch.mean(F.mse_loss(fakes_vgg, reals_vgg, reduce=False), [index for index in fakes_vgg.shape[1:]])
+    vgg_err = torch.mean(F.mse_loss(fakes_vgg, reals_vgg, reduce=False), [index for index in
+                                                                          range(1, len(fakes_vgg.shape[1:]))])
     loss_vgg = torch.mean(4.0 - F.relu(4.0 - vgg_err))
     loss_pixel = torch.mean(4.0 - F.relu(4.0 - pixel_err))
     return loss_pixel + r_loss_scale * loss_vgg
