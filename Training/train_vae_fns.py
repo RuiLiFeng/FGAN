@@ -5,7 +5,7 @@ import torch.nn as nn
 import torchvision
 
 from Network.VaeGAN import losses
-from Utils import utils, vae_utils
+from Utils import utils, vae_utils, parallel_utils
 
 
 # Dummy training function for debugging
@@ -125,6 +125,117 @@ def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_d
         
         # Return G's loss and the components of D's loss.
         return out
+    return train
+
+
+def parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_dict, vgg, config):
+    parallel_loss = losses.ParallelLoss(vgg, config)
+    parallel_loss = parallel_utils.DataParallelCriterion(parallel_loss)
+
+    def train(x):
+        G.optim.zero_grad()
+        D.optim.zero_grad()
+        I.optim.zero_grad()
+        E.optim.zero_grad()
+        L.optim.zero_grad()
+        # How many chunks to split x and y into?
+        x = torch.split(x, config['batch_size'])
+        counter = 0
+
+        # Optionally toggle D and G's "require_grad"
+        if config['toggle_grads']:
+            utils.toggle_grad(D, True)
+            utils.toggle_grad(L, True)
+            utils.toggle_grad(G, False)
+            utils.toggle_grad(I, False)
+            utils.toggle_grad(E, False)
+
+        for step_index in range(config['num_D_steps']):
+            # If accumulating gradients, loop multiple times before an optimizer step
+            D.optim.zero_grad()
+            L.optim.zero_grad()
+            for accumulation_index in range(config['num_D_accumulations']):
+                z_.sample_()
+                y_.sample_()
+                ey_.sample_()
+                D_fake, D_real, D_inv, D_en, _, _ = Decoder(z_[:config['batch_size']], y_[:config['batch_size']],
+                                                            x[counter], ey_[:config['batch_size']], train_G=False,
+                                                            split_D=config['split_D'])
+
+                # Compute components of D's loss, average them, and divide by
+                # the number of gradient accumulations
+                D_loss, out_dict_d = parallel_loss(D_fake=D_fake, D_real=D_real, D_inv=D_inv, D_en=D_en,
+                                                   training_G=False)
+                D_loss.backward()
+                counter += 1
+
+            # Optionally apply ortho reg in D
+            if config['D_ortho'] > 0.0:
+                # Debug print to indicate we're using ortho reg in D.
+                print('using modified ortho reg in D and Latent_Binder')
+                utils.ortho(D, config['D_ortho'])
+                utils.ortho(L, config['L_ortho'])
+
+            D.optim.step()
+            L.optim.step()
+
+        # Optionally toggle "requires_grad"
+        if config['toggle_grads']:
+            utils.toggle_grad(D, False)
+            utils.toggle_grad(L, False)
+            utils.toggle_grad(G, True)
+            utils.toggle_grad(I, True)
+            utils.toggle_grad(E, True)
+
+        # Zero G's gradients by default before training G, for safety
+        G.optim.zero_grad()
+        I.optim.zero_grad()
+        E.optim.zero_grad()
+        counter = 0
+
+        # If accumulating gradients, loop multiple times
+        for accumulation_index in range(config['num_G_accumulations']):
+            z_.sample_()
+            y_.sample_()
+            ey_.sample_()
+            D_fake, _, D_inv, D_en, G_en, reals = Decoder(z_, y_,
+                                                          x[counter], ey_, train_G=True, split_D=config['split_D'])
+            G_loss, out_dict_g = parallel_loss(D_fake=D_fake, D_inv=D_inv, D_en=D_en, G_en=G_en, reals=reals,
+                                               training_G=True)
+            G_loss.backward()
+            counter += 1
+
+        # Optionally apply modified ortho reg in G
+        if config['G_ortho'] > 0.0:
+            print('using modified ortho reg in G, Invert, and Encoder')
+            # Debug print to indicate we're using ortho reg in G
+            # Don't ortho reg shared, it makes no sense. Really we should blacklist any embeddings for this
+            utils.ortho(G, config['G_ortho'],
+                        blacklist=[param for param in G.shared.parameters()])
+            utils.ortho(E, config['E_ortho'])
+            utils.ortho(I, config['I_ortho'])
+        G.optim.step()
+        I.optim.step()
+        E.optim.step()
+
+        # If we have an ema, update it, regardless of if we test with it or not
+        if config['ema']:
+            for ema in ema_list:
+                ema.update(state_dict['itr'])
+
+        out = {'G_loss': float(G_loss.item()),
+               'D_loss': float(D_loss.item())}
+        out.update(out_dict_g)
+        out.update(out_dict_d)
+
+        # Release GPU memory:
+        del G_loss, D_loss
+        del D_fake, D_real, D_inv, D_en, G_en, reals
+        del x
+
+        # Return G's loss and the components of D's loss.
+        return out
+
     return train
 
 

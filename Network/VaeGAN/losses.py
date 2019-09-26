@@ -1,5 +1,7 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
+import torch.nn.modules.loss as loss
 
 
 # DCGAN loss
@@ -51,6 +53,38 @@ def loss_hinge_latent_gen(inv, en):
     loss_inv = torch.mean(F.relu(1. + inv))
     loss_en = torch.mean(F.relu(1. - en))
     return loss_inv + loss_en
+
+
+class ParallelLoss(loss._Loss):
+    def __init__(self, vgg, config, size_average=None, reduce=None, reduction='mean'):
+        super(ParallelLoss, self).__init__(size_average, reduce, reduction)
+        self.vgg = vgg
+        self.adv_loss_scale = config['adv_loss_scale']
+        self.recon_loss_scale = config['recon_loss_scale']
+        self.num_G_accumulations = config['num_G_accumulations']
+        self.num_D_accumulations = config['num_D_accumulations']
+
+    def forward(self, D_fake, D_inv, D_en, D_real=None, G_en=None, reals=None, training_G=True):
+        if training_G:
+            G_loss_fake = generator_loss(D_fake) * self.adv_loss_scale
+            Latent_loss = latent_loss_gen(D_inv, D_en)
+            Recon_loss = recon_loss(G_en, reals, self.vgg, self.recon_loss_scale)
+            G_loss = (G_loss_fake + Latent_loss + Recon_loss) / float(self.num_G_accumulations)
+
+            out_dict = {'Recon_loss': float(Recon_loss.item()),
+                        'G_loss_fake': float(G_loss_fake.item()),
+                        'Latent_loss': float(Latent_loss.item())}
+            return G_loss, out_dict
+        else:
+            D_loss_real, D_loss_fake = discriminator_loss(D_fake, D_real)
+            Latent_loss = latent_loss_dis(D_inv, D_en)
+            D_loss = (D_loss_real + D_loss_fake + Latent_loss) / float(
+                self.num_D_accumulations)
+
+            out_dict = {'D_loss_real': float(D_loss_real.item()),
+                        'D_loss_fake': float(D_loss_fake.item()),
+                        'Latent_loss': float(Latent_loss.item())}
+            return D_loss, out_dict
 
 
 # Default to hinge loss
