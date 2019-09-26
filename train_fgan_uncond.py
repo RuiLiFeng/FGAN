@@ -62,7 +62,7 @@ def run(config):
     L = model.LatentBinder(**config).to(device1)
     I = Invert.Invert(**config).to(device2)
     E = Encoder.Encoder(**config).to(device2)
-    Decoder = model.Decoder(I, E, G, D, L).to(device)
+    Decoder = model.Decoder(I, E, G, D, L).to(device3)
 
     # If using EMA, prepare it
     if config['ema']:

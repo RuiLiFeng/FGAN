@@ -15,8 +15,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2885">
-              <caret line="214" column="24" selection-start-line="214" selection-start-column="24" selection-end-line="214" selection-end-column="24" />
+            <state relative-caret-position="653">
+              <caret line="96" column="38" selection-start-line="96" selection-start-column="38" selection-end-line="96" selection-end-column="38" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -27,22 +27,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="459">
-              <caret line="68" column="56" lean-forward="true" selection-start-line="68" selection-start-column="56" selection-end-line="68" selection-end-column="56" />
+            <state relative-caret-position="627">
+              <caret line="202" column="24" selection-start-line="202" selection-start-column="24" selection-end-line="202" selection-end-column="24" />
               <folding>
                 <element signature="e#65#81#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -51,7 +39,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/train_invGAN.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3321">
+            <state relative-caret-position="335">
               <caret line="123" column="75" selection-start-line="123" selection-start-column="75" selection-end-line="123" selection-end-column="75" />
               <folding>
                 <element signature="e#301#317#0" expanded="true" />
@@ -63,8 +51,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utils/utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="31131">
-              <caret line="1153" column="4" selection-start-line="1153" selection-start-column="4" selection-end-line="1153" selection-end-column="4" />
+            <state relative-caret-position="221">
+              <caret line="228" column="11" selection-start-line="228" selection-start-column="7" selection-end-line="228" selection-end-column="11" />
               <folding>
                 <element signature="e#247#284#0" expanded="true" />
               </folding>
@@ -75,8 +63,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/launch_BigGAN_bs256x8.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="172">
-              <caret line="9" column="12" lean-forward="true" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
+            <state relative-caret-position="576">
+              <caret line="16" column="26" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -84,7 +72,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Network/BigGAN/InvGAN.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
+            <state relative-caret-position="288">
               <caret line="8" column="45" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
@@ -96,8 +84,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utils/vae_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="15" column="49" lean-forward="true" selection-start-line="15" selection-start-column="49" selection-end-line="15" selection-end-column="49" />
+            <state relative-caret-position="144">
+              <caret line="22" column="42" selection-start-line="22" selection-start-column="42" selection-end-line="22" selection-end-column="42" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
               </folding>
@@ -108,7 +96,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Dataset/datasets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5319">
+            <state>
               <caret line="197" column="43" selection-start-line="197" selection-start-column="43" selection-end-line="197" selection-end-column="43" />
               <folding>
                 <element signature="e#98#107#0" expanded="true" />
@@ -120,10 +108,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="351">
-              <caret line="211" column="12" lean-forward="true" selection-start-line="211" selection-start-column="12" selection-end-line="211" selection-end-column="12" />
+            <state relative-caret-position="313">
+              <caret line="198" column="44" lean-forward="true" selection-start-line="198" selection-start-column="44" selection-end-line="198" selection-end-column="44" />
               <folding>
                 <element signature="e#61#77#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="147">
+              <caret line="39" column="79" selection-start-line="39" selection-start-column="79" selection-end-line="39" selection-end-column="79" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -202,11 +202,63 @@
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
-    <navigator currentView="Scope" currentSubView="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope" proportions="" version="1">
+    <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="Dataset" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="Metric" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="Network" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="Network" type="462c0819:PsiDirectoryNode" />
+              <item name="BigGAN" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="Network" type="462c0819:PsiDirectoryNode" />
+              <item name="VaeGAN" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="Training" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="Utils" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
       <pane id="Scope">
         <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
           <expand>
@@ -287,12 +339,12 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="80030000" />
+    <option name="totallyTimeSpent" value="80253000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1513" height="973" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20315717" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12739871" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -306,8 +358,8 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.34875444" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="12" visible="true" weight="0.4673784" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.17678958" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.46637744" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -441,7 +493,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Training/train_fns.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="864">
+        <state relative-caret-position="213">
           <caret line="32" selection-start-line="32" selection-end-line="32" />
           <folding>
             <element signature="e#96#108#0" expanded="true" />
@@ -451,7 +503,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/train_invGAN.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3321">
+        <state relative-caret-position="335">
           <caret line="123" column="75" selection-start-line="123" selection-start-column="75" selection-end-line="123" selection-end-column="75" />
           <folding>
             <element signature="e#301#317#0" expanded="true" />
@@ -461,8 +513,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Utils/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="31131">
-          <caret line="1153" column="4" selection-start-line="1153" selection-start-column="4" selection-end-line="1153" selection-end-column="4" />
+        <state relative-caret-position="221">
+          <caret line="228" column="11" selection-start-line="228" selection-start-column="7" selection-end-line="228" selection-end-column="11" />
           <folding>
             <element signature="e#247#284#0" expanded="true" />
           </folding>
@@ -471,7 +523,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Network/BigGAN/InvGAN.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
+        <state relative-caret-position="288">
           <caret line="8" column="45" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
@@ -481,7 +533,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Dataset/datasets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5319">
+        <state>
           <caret line="197" column="43" selection-start-line="197" selection-start-column="43" selection-end-line="197" selection-end-column="43" />
           <folding>
             <element signature="e#98#107#0" expanded="true" />
@@ -491,8 +543,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2885">
-          <caret line="214" column="24" selection-start-line="214" selection-start-column="24" selection-end-line="214" selection-end-column="24" />
+        <state relative-caret-position="653">
+          <caret line="96" column="38" selection-start-line="96" selection-start-column="38" selection-end-line="96" selection-end-column="38" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
@@ -501,8 +553,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Utils/vae_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="15" column="49" lean-forward="true" selection-start-line="15" selection-start-column="49" selection-end-line="15" selection-end-column="49" />
+        <state relative-caret-position="144">
+          <caret line="22" column="42" selection-start-line="22" selection-start-column="42" selection-end-line="22" selection-end-column="42" />
           <folding>
             <element signature="e#0#37#0" expanded="true" />
           </folding>
@@ -511,8 +563,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="351">
-          <caret line="211" column="12" lean-forward="true" selection-start-line="211" selection-start-column="12" selection-end-line="211" selection-end-column="12" />
+        <state relative-caret-position="313">
+          <caret line="198" column="44" lean-forward="true" selection-start-line="198" selection-start-column="44" selection-end-line="198" selection-end-column="44" />
           <folding>
             <element signature="e#61#77#0" expanded="true" />
           </folding>
@@ -521,15 +573,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/launch_BigGAN_bs256x8.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="172">
-          <caret line="9" column="12" lean-forward="true" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
+        <state relative-caret-position="576">
+          <caret line="16" column="26" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="26" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="68" column="56" lean-forward="true" selection-start-line="68" selection-start-column="56" selection-end-line="68" selection-end-column="56" />
+        <state relative-caret-position="627">
+          <caret line="202" column="24" selection-start-line="202" selection-start-column="24" selection-end-line="202" selection-end-column="24" />
           <folding>
             <element signature="e#65#81#0" expanded="true" />
           </folding>
@@ -538,8 +590,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
-          <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
+        <state relative-caret-position="147">
+          <caret line="39" column="79" selection-start-line="39" selection-start-column="79" selection-end-line="39" selection-end-column="79" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
