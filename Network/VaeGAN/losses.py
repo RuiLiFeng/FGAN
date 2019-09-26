@@ -1,6 +1,5 @@
 import torch
 import torch.nn.functional as F
-from Metric.vggutils import load_vgg_from_local
 
 
 # DCGAN loss
@@ -31,8 +30,7 @@ def loss_hinge_gen(dis_fake):
     return loss
 
 
-def loss_hinge_recon(fakes, reals, r_loss_scale=0.001):
-    vgg = load_vgg_from_local()
+def loss_hinge_recon(fakes, reals, vgg, r_loss_scale=0.001):
     pixel_err = torch.mean(F.mse_loss(fakes, reals, reduce=False), [index for index in range(1, len(fakes.shape[1:]))])
     fakes_vgg = vgg(fakes)
     reals_vgg = vgg(reals)

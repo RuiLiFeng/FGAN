@@ -17,6 +17,7 @@ from sync_batchnorm import patch_replication_callback
 from Utils import vae_utils
 from Network.VaeGAN import Invert, Encoder
 from importlib import import_module
+from Metric.vggutils import load_vgg_from_local
 
 
 # The main training file. Config is a dictionary specifying the configuration
@@ -143,6 +144,8 @@ def run(config):
     # Prepare inception metrics: FID and IS
     get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'], config['parallel'],
                                                                       config['data_root'], config['no_fid'])
+    # Prepare vgg for recon_loss
+    vgg = load_vgg_from_local()
     # Prepare KNN for evaluating encoder.
     KNN = vae_utils.KNN(loaders[0])
     # Prepare noise and randomly sampled label arrays
@@ -163,7 +166,7 @@ def run(config):
     # Loaders are loaded, prepare the training function
     if config['which_train_fn'] == 'GAN':
         train = train_vae_fns.VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_,
-                                                    [gema, iema, eema], state_dict, config)
+                                                    [gema, iema, eema], state_dict, vgg, config)
     # Else, assume debugging and use the dummy train fn
     else:
         train = train_vae_fns.dummy_training_function()

@@ -81,9 +81,9 @@ class KNN(object):
         """
         FTWS: return dict as out in train_fns.
         """
-        anchor_v = encoder(self.anchor).split(1, 0)
         precision = 0
         with torch.no_grad:
+            anchor_v = encoder(self.anchor).split(1, 0)
             for i, (x, y) in enumerate(self.dataloader):
                 if i > self.sample_batch:
                     break
