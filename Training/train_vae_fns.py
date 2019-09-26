@@ -158,14 +158,13 @@ def parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, st
                 z_.sample_()
                 y_.sample_()
                 ey_.sample_()
-                D_fake, D_real, D_inv, D_en, _, _ = Decoder(z_[:config['batch_size']], y_[:config['batch_size']],
-                                                            x[counter], ey_[:config['batch_size']], train_G=False,
-                                                            split_D=config['split_D'])
+                out_tuple = Decoder(z_[:config['batch_size']], y_[:config['batch_size']],
+                                    x[counter], ey_[:config['batch_size']], train_G=False,
+                                    split_D=config['split_D'])
 
                 # Compute components of D's loss, average them, and divide by
                 # the number of gradient accumulations
-                D_loss, out_dict_d = parallel_loss(D_fake=D_fake, D_real=D_real, D_inv=D_inv, D_en=D_en,
-                                                   training_G=False)
+                D_loss, out_dict_d = parallel_loss(out_tuple, training_G=False)
                 D_loss.backward()
                 counter += 1
 
@@ -198,10 +197,9 @@ def parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, st
             z_.sample_()
             y_.sample_()
             ey_.sample_()
-            D_fake, _, D_inv, D_en, G_en, reals = Decoder(z_, y_,
-                                                          x[counter], ey_, train_G=True, split_D=config['split_D'])
-            G_loss, out_dict_g = parallel_loss(D_fake=D_fake, D_inv=D_inv, D_en=D_en, G_en=G_en, reals=reals,
-                                               training_G=True)
+            out_tuple = Decoder(z_, y_,
+                                x[counter], ey_, train_G=True, split_D=config['split_D'])
+            G_loss, out_dict_g = parallel_loss(out_tuple, training_G=True)
             G_loss.backward()
             counter += 1
 

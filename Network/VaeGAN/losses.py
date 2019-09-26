@@ -64,7 +64,14 @@ class ParallelLoss(loss._Loss):
         self.num_G_accumulations = config['num_G_accumulations']
         self.num_D_accumulations = config['num_D_accumulations']
 
-    def forward(self, D_fake, D_inv, D_en, D_real=None, G_en=None, reals=None, training_G=True):
+    def forward(self, input_tuple, training_G=True):
+        """
+
+        :param input_tuple: D_fake, D_real, D_inv, D_en, G_en, reals
+        :param training_G:
+        :return:
+        """
+        D_fake, D_real, D_inv, D_en, G_en, reals = input_tuple
         if training_G:
             G_loss_fake = generator_loss(D_fake) * self.adv_loss_scale
             Latent_loss = latent_loss_gen(D_inv, D_en)

@@ -147,24 +147,24 @@ class DataParallelCriterion(DataParallel):
          y = net(x)
          loss = criterion(y, target)
     """
-    def forward(self, inputs, *targets, **kwargs):
+    # FTWS: We have removed 'targets' for parallel_loss
+    def forward(self, inputs, **kwargs):
         # input should be already scatterd
         # scattering the targets instead
         if not self.device_ids:
-            return self.module(inputs, *targets, **kwargs)
-        targets, kwargs = self.scatter(targets, kwargs, self.device_ids)
+            return self.module(inputs, **kwargs)
+        kwargs = self.scatter(kwargs, self.device_ids)
         if len(self.device_ids) == 1:
-            return self.module(inputs, *targets[0], **kwargs[0])
+            return self.module(inputs, **kwargs[0])
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
-        outputs = _criterion_parallel_apply(replicas, inputs, targets, kwargs)
+        outputs = _criterion_parallel_apply(replicas, inputs, kwargs)
         #return Reduce.apply(*outputs) / len(outputs)
         #return self.gather(outputs, self.output_device).mean()
         return self.gather(outputs, self.output_device)
 
 
-def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices=None):
+def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
     assert len(modules) == len(inputs)
-    assert len(targets) == len(inputs)
     if kwargs_tup:
         assert len(modules) == len(kwargs_tup)
     else:
@@ -179,7 +179,7 @@ def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices
     if torch_ver != "0.3":
         grad_enabled = torch.is_grad_enabled()
 
-    def _worker(i, module, input, target, kwargs, device=None):
+    def _worker(i, module, input, kwargs, device=None):
         if torch_ver != "0.3":
             torch.set_grad_enabled(grad_enabled)
         if device is None:
@@ -189,9 +189,7 @@ def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices
                 # this also avoids accidental slicing of `input` if it is a Tensor
                 if not isinstance(input, (list, tuple)):
                     input = (input,)
-                if not isinstance(target, (list, tuple)):
-                    target = (target,)
-                output = module(*(input + target), **kwargs)
+                output = module(*(input), **kwargs)
             with lock:
                 results[i] = output
         except Exception as e:
@@ -200,10 +198,10 @@ def _criterion_parallel_apply(modules, inputs, targets, kwargs_tup=None, devices
 
     if len(modules) > 1:
         threads = [threading.Thread(target=_worker,
-                                    args=(i, module, input, target,
+                                    args=(i, module, input,
                                           kwargs, device),)
-                   for i, (module, input, target, kwargs, device) in
-                   enumerate(zip(modules, inputs, targets, kwargs_tup, devices))]
+                   for i, (module, input, kwargs, device) in
+                   enumerate(zip(modules, inputs, kwargs_tup, devices))]
 
         for thread in threads:
             thread.start()
