@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4aade3ec-06b5-4da1-8c83-35e7e5052228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Network/VaeGAN/losses.py" beforeDir="false" afterPath="$PROJECT_DIR$/Network/VaeGAN/losses.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,24 +25,24 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Training/train_fns.py">
+        <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="864">
-              <caret line="32" selection-start-line="32" selection-end-line="32" />
+            <state relative-caret-position="459">
+              <caret line="68" column="56" lean-forward="true" selection-start-line="68" selection-start-column="56" selection-end-line="68" selection-end-column="56" />
               <folding>
-                <element signature="e#96#108#0" expanded="true" />
+                <element signature="e#65#81#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
+        <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="310">
-              <caret line="56" column="44" lean-forward="true" selection-start-line="56" selection-start-column="44" selection-end-line="56" selection-end-column="44" />
+            <state relative-caret-position="224">
+              <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
               <folding>
-                <element signature="e#65#81#0" expanded="true" />
+                <element signature="e#0#12#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -75,8 +75,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/launch_BigGAN_bs256x8.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="8" column="15" selection-start-line="8" selection-start-column="15" selection-end-line="8" selection-end-column="15" />
+            <state relative-caret-position="172">
+              <caret line="9" column="12" lean-forward="true" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
             </state>
           </provider>
         </entry>
@@ -174,13 +174,13 @@
         <option value="$PROJECT_DIR$/Utils/train_utils.py" />
         <option value="$PROJECT_DIR$/Network/BigGAN/InvGAN.py" />
         <option value="$PROJECT_DIR$/train_invGAN.py" />
-        <option value="$PROJECT_DIR$/Network/VaeGAN/losses.py" />
         <option value="$PROJECT_DIR$/Utils/utils.py" />
         <option value="$PROJECT_DIR$/Training/train_fns.py" />
-        <option value="$PROJECT_DIR$/train_fgan_uncond.py" />
         <option value="$PROJECT_DIR$/Training/train_vae_fns.py" />
         <option value="$PROJECT_DIR$/Utils/vae_utils.py" />
         <option value="$PROJECT_DIR$/Network/VaeGAN/Decoder.py" />
+        <option value="$PROJECT_DIR$/train_fgan_uncond.py" />
+        <option value="$PROJECT_DIR$/Network/VaeGAN/losses.py" />
       </list>
     </option>
   </component>
@@ -224,6 +224,11 @@
               <item name="D:\program\FGAN" type="442cc68d:ScopeViewTreeModel$RootNode" />
               <item name="Network" type="9f88c78c:ScopeViewTreeModel$FileNode" />
               <item name="VaeGAN" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="D:\program\FGAN" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="scripts" type="9f88c78c:ScopeViewTreeModel$FileNode" />
             </path>
           </expand>
           <select />
@@ -277,16 +282,15 @@
       <workItem from="1569078687493" duration="67793000" />
       <workItem from="1569379083101" duration="1100000" />
       <workItem from="1569417497294" duration="375000" />
-      <workItem from="1569417878487" duration="3240000" />
+      <workItem from="1569417878487" duration="5552000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="77718000" />
+    <option name="totallyTimeSpent" value="80030000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1513" height="973" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20315717" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -302,8 +306,8 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.34875444" />
-      <window_info anchor="bottom" id="Python Console" order="12" weight="0.3380783" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.34875444" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="12" visible="true" weight="0.4673784" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -435,16 +439,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="33" column="53" lean-forward="true" selection-start-line="33" selection-start-column="53" selection-end-line="33" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Training/train_fns.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="864">
@@ -472,13 +466,6 @@
           <folding>
             <element signature="e#247#284#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/launch_BigGAN_bs256x8.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="8" column="15" selection-start-line="8" selection-start-column="15" selection-end-line="8" selection-end-column="15" />
         </state>
       </provider>
     </entry>
@@ -532,12 +519,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/launch_BigGAN_bs256x8.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="9" column="12" lean-forward="true" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="56" column="44" lean-forward="true" selection-start-line="56" selection-start-column="44" selection-end-line="56" selection-end-column="44" />
+        <state relative-caret-position="459">
+          <caret line="68" column="56" lean-forward="true" selection-start-line="68" selection-start-column="56" selection-end-line="68" selection-end-column="56" />
           <folding>
             <element signature="e#65#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="224">
+          <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
