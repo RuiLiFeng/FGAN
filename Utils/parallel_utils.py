@@ -5,7 +5,7 @@ from torch.autograd import Variable, Function
 import torch.cuda.comm as comm
 from torch.nn.parallel.data_parallel import DataParallel
 from torch.nn.parallel.parallel_apply import get_a_var
-from torch.nn.parallel.scatter_gather import gather
+from torch.nn.parallel.scatter_gather import gather, scatter
 from torch.nn.parallel._functions import ReduceAddCoalesced, Broadcast
 from torch.nn.parallel.distributed import DistributedDataParallel
 
@@ -132,6 +132,13 @@ class DataParallelModel(DataParallel):
         return modules
 
 
+def scatter_kwargs(kwargs, target_gpus, dim=0):
+    r"""Scatter with support for kwargs dictionary"""
+    kwargs = scatter(kwargs, target_gpus, dim) if kwargs else []
+    kwargs = tuple(kwargs)
+    return kwargs
+
+
 class DataParallelCriterion(DataParallel):
     """
     Calculate loss in multiple-GPUs, which balance the memory usage.
@@ -153,7 +160,7 @@ class DataParallelCriterion(DataParallel):
         # scattering the targets instead
         if not self.device_ids:
             return self.module(inputs, **kwargs)
-        inputs, kwargs = self.scatter(inputs, kwargs, self.device_ids)
+        kwargs = scatter_kwargs(kwargs, self.device_ids)
         if len(self.device_ids) == 1:
             return self.module(inputs, **kwargs[0])
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
