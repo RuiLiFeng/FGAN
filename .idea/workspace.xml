@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4aade3ec-06b5-4da1-8c83-35e7e5052228" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Network/VaeGAN/Decoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/Network/VaeGAN/Decoder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/train_vae_fns.py" beforeDir="false" afterPath="$PROJECT_DIR$/Training/train_vae_fns.py" afterDir="false" />
-    </list>
+    <list default="true" id="4aade3ec-06b5-4da1-8c83-35e7e5052228" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,11 +22,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="478">
-              <caret line="168" column="28" lean-forward="true" selection-start-line="168" selection-start-column="28" selection-end-line="168" selection-end-column="28" />
+            <state relative-caret-position="514">
+              <caret line="202" column="29" lean-forward="true" selection-start-line="202" selection-start-column="29" selection-end-line="202" selection-end-column="29" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -95,11 +91,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utils/parallel_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1080">
-              <caret line="126" column="22" lean-forward="true" selection-start-line="126" selection-start-column="22" selection-end-line="126" selection-end-column="22" />
+            <state relative-caret-position="828">
+              <caret line="205" column="30" lean-forward="true" selection-start-line="205" selection-start-column="30" selection-end-line="205" selection-end-column="30" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
               </folding>
@@ -122,8 +118,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="190">
-              <caret line="63" column="64" lean-forward="true" selection-start-line="63" selection-start-column="64" selection-end-line="63" selection-end-column="64" />
+            <state relative-caret-position="1091">
+              <caret line="93" column="35" lean-forward="true" selection-start-line="93" selection-start-column="35" selection-end-line="93" selection-end-column="35" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -180,10 +176,10 @@
         <option value="$PROJECT_DIR$/Utils/utils.py" />
         <option value="$PROJECT_DIR$/Training/train_fns.py" />
         <option value="$PROJECT_DIR$/Utils/vae_utils.py" />
-        <option value="$PROJECT_DIR$/Utils/parallel_utils.py" />
-        <option value="$PROJECT_DIR$/Network/VaeGAN/losses.py" />
         <option value="$PROJECT_DIR$/train_fgan_uncond.py" />
         <option value="$PROJECT_DIR$/Network/VaeGAN/Decoder.py" />
+        <option value="$PROJECT_DIR$/Utils/parallel_utils.py" />
+        <option value="$PROJECT_DIR$/Network/VaeGAN/losses.py" />
         <option value="$PROJECT_DIR$/Training/train_vae_fns.py" />
       </list>
     </option>
@@ -323,12 +319,12 @@
       <workItem from="1569379083101" duration="1100000" />
       <workItem from="1569417497294" duration="375000" />
       <workItem from="1569417878487" duration="5552000" />
-      <workItem from="1569504461137" duration="3969000" />
+      <workItem from="1569504461137" duration="4526000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="90328000" />
+    <option name="totallyTimeSpent" value="90885000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -348,8 +344,8 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.27006507" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="12" visible="true" weight="0.20932755" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.27006507" />
+      <window_info anchor="bottom" id="Python Console" order="12" weight="0.34815618" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -550,32 +546,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="175" column="55" lean-forward="true" selection-start-line="175" selection-start-column="55" selection-end-line="175" selection-end-column="55" />
-          <folding>
-            <element signature="e#65#81#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Metric/inception_utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="251" column="51" lean-forward="true" selection-start-line="251" selection-start-column="51" selection-end-line="251" selection-end-column="51" />
           <folding>
             <element signature="e#738#756#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="63" column="64" lean-forward="true" selection-start-line="63" selection-start-column="64" selection-end-line="63" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -590,22 +566,42 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
+    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="478">
-          <caret line="168" column="28" lean-forward="true" selection-start-line="168" selection-start-column="28" selection-end-line="168" selection-end-column="28" />
+        <state relative-caret-position="1091">
+          <caret line="93" column="35" lean-forward="true" selection-start-line="93" selection-start-column="35" selection-end-line="93" selection-end-column="35" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Utils/parallel_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1080">
-          <caret line="126" column="22" lean-forward="true" selection-start-line="126" selection-start-column="22" selection-end-line="126" selection-end-column="22" />
+        <state relative-caret-position="828">
+          <caret line="205" column="30" lean-forward="true" selection-start-line="205" selection-start-column="30" selection-end-line="205" selection-end-column="30" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_fgan_uncond.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="175" column="55" lean-forward="true" selection-start-line="175" selection-start-column="55" selection-end-line="175" selection-end-column="55" />
+          <folding>
+            <element signature="e#65#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="514">
+          <caret line="202" column="29" lean-forward="true" selection-start-line="202" selection-start-column="29" selection-end-line="202" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>

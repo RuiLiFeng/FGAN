@@ -228,7 +228,6 @@ def parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, st
 
         # Release GPU memory:
         del G_loss, D_loss
-        del D_fake, D_real, D_inv, D_en, G_en, reals
         del x
 
         # Return G's loss and the components of D's loss.
