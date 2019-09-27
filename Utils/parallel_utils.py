@@ -5,7 +5,7 @@ from torch.autograd import Variable, Function
 import torch.cuda.comm as comm
 from torch.nn.parallel.data_parallel import DataParallel
 from torch.nn.parallel.parallel_apply import get_a_var
-from torch.nn.parallel.scatter_gather import gather, scatter
+from torch.nn.parallel.scatter_gather import gather, scatter, Gather
 from torch.nn.parallel._functions import ReduceAddCoalesced, Broadcast
 from torch.nn.parallel.distributed import DistributedDataParallel
 
@@ -139,6 +139,33 @@ def scatter_kwargs(kwargs, target_gpus, dim=0):
     return kwargs
 
 
+def _gather(outputs, target_device, dim=0):
+    r"""
+    Gathers tensors from different GPUs on a specified device
+      (-1 means the CPU).
+    """
+    def gather_map(outputs):
+        out = outputs[0]
+        if isinstance(out, torch.Tensor):
+            return Gather.apply(target_device, dim, *outputs)
+        if out is None:
+            return None
+        if isinstance(out, dict):
+            if not all((len(out) == len(d) for d in outputs)):
+                raise ValueError('All dicts must have the same number of keys')
+            return type(out)(((k, gather_map([d[k] for d in outputs]))
+                              for k in out))
+        return type(out)(map(gather_map, zip(*outputs)))
+
+    # Recursive function calls like this create reference cycles.
+    # Setting the function to None clears the refcycle.
+    try:
+        res = gather_map(outputs)
+    finally:
+        gather_map = None
+    return res
+
+
 class DataParallelCriterion(DataParallel):
     """
     Calculate loss in multiple-GPUs, which balance the memory usage.
@@ -165,6 +192,7 @@ class DataParallelCriterion(DataParallel):
             return self.module(inputs, **kwargs[0])
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
         outputs = _criterion_parallel_apply(replicas, inputs, kwargs)
+        print(outputs)
         #return Reduce.apply(*outputs) / len(outputs)
         #return self.gather(outputs, self.output_device).mean()
         return self.gather(outputs, self.output_device)
@@ -197,6 +225,8 @@ def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
                 # this also avoids accidental slicing of `input` if it is a Tensor
                 if not isinstance(input, (list, tuple)):
                     input = (input,)
+                # FTWS: Notice that in Decoder and parallel loss the input has already been tuple, so
+                # we change codes here.
                 output = module(input, **kwargs)
             with lock:
                 results[i] = output
