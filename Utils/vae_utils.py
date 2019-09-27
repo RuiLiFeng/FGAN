@@ -72,7 +72,7 @@ class KNN(object):
                  sample_batch=10,
                  anchor_num=10):
         self.K = K
-        assert K < anchor_num
+        assert K <= anchor_num
         self.sample_batch = sample_batch
         self.anchor, self.anchor_label = make_anchor(dataloader, anchor_num)
         self.dataloader = dataloader
