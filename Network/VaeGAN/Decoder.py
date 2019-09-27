@@ -23,6 +23,30 @@ class Generator(BigGAN.Generator):
         super(Generator, self).__init__(**kwargs)
         self.name = name if name is not None else "G"
 
+    def forward(self, z, y):
+        # If hierarchical, concatenate zs and ys
+        if self.hier:
+            zs = torch.split(z, self.z_chunk_size, 1)
+            z = zs[0]
+            ys = [torch.cat([y, item], 1) for item in zs[1:]]
+        else:
+            ys = [y] * len(self.blocks)
+
+        # First linear layer
+        z = self.linear(z)
+        # Reshape
+        z = z.view(z.size(0), -1, self.bottom_width, self.bottom_width)
+
+        # Loop over blocks
+        for index, blocklist in enumerate(self.blocks):
+            # Second inner loop in case block has multiple layers
+            for block in blocklist:
+                z = block(z, ys[index])
+
+        # Apply batchnorm-relu-conv-tanh at output
+        del ys, y
+        return torch.tanh(self.output_layer(z))
+
 
 class Discriminator(BigGAN.Discriminator):
     """
@@ -42,15 +66,15 @@ class Discriminator(BigGAN.Discriminator):
         if y is not None:
             raise ValueError("This is the unconditional discriminator, where y must be none, got {}!".format(y))
         # Stick x into h for cleaner for loops without flow control
-        h = x
+        # h = x
         # Loop over blocks
         for index, blocklist in enumerate(self.blocks):
             for block in blocklist:
-                h = block(h)
+                x = block(x)
         # Apply global sum pooling as in SN-GAN
-        h = torch.sum(self.activation(h), [2, 3])
+        x = torch.sum(self.activation(x), [2, 3])
         # Get initial class-unconditional output
-        out = self.linear(h)
+        x = self.linear(x)
         # Get projection of final featureset onto class vectors and add to evidence
 
         # Get y batch index
@@ -58,7 +82,7 @@ class Discriminator(BigGAN.Discriminator):
         # y_index = torch.nonzero(y == UNLABEL)
         # y = y[y_index]
         # out = out + torch.sum(self.embed(y) * h, 1, keepdim=True)
-        return out
+        return x
 
 
 class LatentBinder(nn.Module):
@@ -107,12 +131,12 @@ class LatentBinder(nn.Module):
         print('Param count for D''s initialized parameters: %d' % self.param_count)
 
     def forward(self, z):
-            z = z.reshape([z.shape[0], 1, z.shape[1]])
-            for layer in self.layers:
-                z = layer(z)
-            z = z.reshape([z.shape[0], -1])
-            out = self.out(z)
-            return out
+        z = z.reshape([z.shape[0], 1, z.shape[1]])
+        for layer in self.layers:
+            z = layer(z)
+        z = z.reshape([z.shape[0], -1])
+        z = self.out(z)
+        return z
 
 
 class ResBlock(nn.Module):
@@ -142,6 +166,7 @@ class ResBlock(nn.Module):
         identity = self.shortcut(x)
         x = self.res_layer(x)
         x += identity
+        del identity
         x = self.relu(x)
         return x
 

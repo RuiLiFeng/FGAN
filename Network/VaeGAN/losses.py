@@ -2,6 +2,10 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import torch.nn.modules.loss as loss
+import functools
+
+
+Relu = functools.partial(F.relu, inplace=True)
 
 
 # DCGAN loss
@@ -18,8 +22,8 @@ def loss_dcgan_gen(dis_fake):
 
 # Hinge Loss
 def loss_hinge_dis(dis_fake, dis_real):
-    loss_real = torch.mean(F.relu(1. - dis_real))
-    loss_fake = torch.mean(F.relu(1. + dis_fake))
+    loss_real = torch.mean(Relu(1. - dis_real))
+    loss_fake = torch.mean(Relu(1. + dis_fake))
     return loss_real, loss_fake
     # def loss_hinge_dis(dis_fake, dis_real): # This version returns a single loss
     # loss = torch.mean(F.relu(1. - dis_real))
@@ -38,21 +42,18 @@ def loss_hinge_recon(fakes, reals, vgg, r_loss_scale=0.001):
     reals_vgg = vgg(reals)
     vgg_err = torch.mean(F.mse_loss(fakes_vgg, reals_vgg, reduce=False), [index for index in
                                                                           range(1, len(fakes_vgg.shape[1:]))])
-    loss_vgg = torch.mean(4.0 - F.relu(4.0 - vgg_err))
-    loss_pixel = torch.mean(4.0 - F.relu(4.0 - pixel_err))
+    loss_vgg = torch.mean(4.0 - Relu(4.0 - vgg_err))
+    loss_pixel = torch.mean(4.0 - Relu(4.0 - pixel_err))
+    del pixel_err, fakes_vgg, reals_vgg, vgg_err
     return loss_pixel + r_loss_scale * loss_vgg
 
 
 def loss_hinge_latent_dis(inv, en):
-    loss_inv = torch.mean(F.relu(1. - inv))
-    loss_en = torch.mean(F.relu(1. + en))
-    return loss_inv + loss_en
+    return torch.mean(Relu(1. - inv)) + torch.mean(Relu(1. + en))
 
 
 def loss_hinge_latent_gen(inv, en):
-    loss_inv = torch.mean(F.relu(1. + inv))
-    loss_en = torch.mean(F.relu(1. - en))
-    return loss_inv + loss_en
+    return torch.mean(Relu(1. + inv)) + torch.mean(Relu(1. - en))
 
 
 class ParallelLoss(loss._Loss):
@@ -74,23 +75,30 @@ class ParallelLoss(loss._Loss):
         D_fake, D_real, D_inv, D_en, G_en, reals = input_tuple
         if training_G:
             G_loss_fake = generator_loss(D_fake) * self.adv_loss_scale
+            del D_fake, D_real
             Latent_loss = latent_loss_gen(D_inv, D_en)
+            del D_inv, D_en
             Recon_loss = recon_loss(G_en, reals, self.vgg, self.recon_loss_scale)
+            del G_en, reals
             G_loss = (G_loss_fake + Latent_loss + Recon_loss) / float(self.num_G_accumulations)
 
             out_dict = {'Recon_loss': float(Recon_loss.item()),
                         'G_loss_fake': float(G_loss_fake.item()),
                         'Latent_loss': float(Latent_loss.item())}
+            del G_loss_fake, Latent_loss, Recon_loss, input_tuple
             return G_loss, out_dict
         else:
             D_loss_real, D_loss_fake = discriminator_loss(D_fake, D_real)
+            del D_fake, D_real
             Latent_loss = latent_loss_dis(D_inv, D_en)
+            del D_inv, D_en
             D_loss = (D_loss_real + D_loss_fake + Latent_loss) / float(
                 self.num_D_accumulations)
 
             out_dict = {'D_loss_real': float(D_loss_real.item()),
                         'D_loss_fake': float(D_loss_fake.item()),
                         'Latent_loss': float(Latent_loss.item())}
+            del D_loss_real, D_loss_fake, Latent_loss, input_tuple
             return D_loss, out_dict
 
 

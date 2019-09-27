@@ -83,6 +83,7 @@ class step(nn.Module):
         x2 = x[:, x.shape[1] // 2:]
         x2 = torch.add(x2, self.phi(x1))
         x = torch.cat((x1, x2), dim=1)
+        del x1, x2
         return x
 
 
