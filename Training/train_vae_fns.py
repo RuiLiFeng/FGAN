@@ -161,6 +161,8 @@ def parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, st
                 out_tuple = Decoder(z_[:config['batch_size']], y_[:config['batch_size']],
                                     x[counter], ey_[:config['batch_size']], train_G=False,
                                     split_D=config['split_D'])
+                print("out tuple of decoder")
+                print(out_tuple)
 
                 # Compute components of D's loss, average them, and divide by
                 # the number of gradient accumulations

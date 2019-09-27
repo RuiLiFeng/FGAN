@@ -156,6 +156,8 @@ class DataParallelCriterion(DataParallel):
     """
     # FTWS: We have removed 'targets' for parallel_loss
     def forward(self, inputs, **kwargs):
+        print("Inputs of parallel loss")
+        print(inputs)
         # input should be already scatterd
         # scattering the targets instead
         if not self.device_ids:
@@ -183,14 +185,11 @@ def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
 
     lock = threading.Lock()
     results = {}
-    print(kwargs_tup)
-    print(inputs)
+
     if torch_ver != "0.3":
         grad_enabled = torch.is_grad_enabled()
 
     def _worker(i, module, input, kwargs, device=None):
-        print(kwargs)
-        print(input)
         if torch_ver != "0.3":
             torch.set_grad_enabled(grad_enabled)
         if device is None:
