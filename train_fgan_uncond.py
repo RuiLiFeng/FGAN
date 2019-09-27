@@ -144,7 +144,8 @@ def run(config):
     get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'], config['parallel'],
                                                                       config['data_root'], config['no_fid'])
     # Prepare vgg for recon_loss, considering loss is parallel, it's no need for vgg to be parallel
-    vgg = load_vgg_from_local(parallel=False)
+    # vgg is pretrained on imagenet, so we cannot use it.
+    # vgg = load_vgg_from_local(parallel=False)
     # Prepare KNN for evaluating encoder.
     KNN = vae_utils.KNN(loaders[0], anchor_num=1, K=1)
     # Prepare noise and randomly sampled label arrays
@@ -167,7 +168,7 @@ def run(config):
         # train = train_vae_fns.VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_,
         #                                             [gema, iema, eema], state_dict, vgg, config)
         train = train_vae_fns.parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_,
-                                                    [gema, iema, eema], state_dict, vgg, config)
+                                                         [gema, iema, eema], state_dict, config)
     # Else, assume debugging and use the dummy train fn
     else:
         train = train_vae_fns.dummy_training_function()

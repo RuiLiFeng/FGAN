@@ -48,6 +48,13 @@ def loss_hinge_recon(fakes, reals, vgg, r_loss_scale=0.001):
     return loss_pixel + r_loss_scale * loss_vgg
 
 
+def loss_hinge_recon_pixel(fakes, reals):
+    pixel_err = torch.mean(F.mse_loss(fakes, reals, reduce=False), [index for index in range(1, len(fakes.shape[1:]))])
+    loss_pixel = torch.mean(4.0 - Relu(4.0 - pixel_err))
+    del pixel_err
+    return loss_pixel
+
+
 def loss_hinge_latent_dis(inv, en):
     return torch.mean(Relu(1. - inv)) + torch.mean(Relu(1. + en))
 
@@ -57,11 +64,9 @@ def loss_hinge_latent_gen(inv, en):
 
 
 class ParallelLoss(loss._Loss):
-    def __init__(self, vgg, config, size_average=None, reduce=None, reduction='mean'):
+    def __init__(self, config, size_average=None, reduce=None, reduction='mean'):
         super(ParallelLoss, self).__init__(size_average, reduce, reduction)
-        self.vgg = vgg
         self.adv_loss_scale = config['adv_loss_scale']
-        self.recon_loss_scale = config['recon_loss_scale']
         self.num_G_accumulations = config['num_G_accumulations']
         self.num_D_accumulations = config['num_D_accumulations']
 
@@ -78,7 +83,7 @@ class ParallelLoss(loss._Loss):
             del D_fake, D_real
             Latent_loss = latent_loss_gen(D_inv, D_en)
             del D_inv, D_en
-            Recon_loss = recon_loss(G_en, reals, self.vgg, self.recon_loss_scale)
+            Recon_loss = recon_loss(G_en, reals)
             del G_en, reals
             G_loss = (G_loss_fake + Latent_loss + Recon_loss) / float(self.num_G_accumulations)
 
@@ -107,4 +112,4 @@ generator_loss = loss_hinge_gen
 discriminator_loss = loss_hinge_dis
 latent_loss_dis = loss_hinge_latent_dis
 latent_loss_gen = loss_hinge_latent_gen
-recon_loss = loss_hinge_recon
+recon_loss = loss_hinge_recon_pixel

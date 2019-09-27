@@ -128,8 +128,8 @@ def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_d
     return train
 
 
-def parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_dict, vgg, config):
-    parallel_loss = losses.ParallelLoss(vgg, config)
+def parallel_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_dict, config):
+    parallel_loss = losses.ParallelLoss(config)
     parallel_loss = parallel_utils.DataParallelCriterion(parallel_loss)
 
     def train(x):
