@@ -5,7 +5,7 @@ from torch.autograd import Variable, Function
 import torch.cuda.comm as comm
 from torch.nn.parallel.data_parallel import DataParallel
 from torch.nn.parallel.parallel_apply import get_a_var
-from torch.nn.parallel.scatter_gather import gather
+from torch.nn.parallel.scatter_gather import gather, scatter
 from torch.nn.parallel._functions import ReduceAddCoalesced, Broadcast
 from torch.nn.parallel.distributed import DistributedDataParallel
 
@@ -153,7 +153,7 @@ class DataParallelCriterion(DataParallel):
         # scattering the targets instead
         if not self.device_ids:
             return self.module(inputs, **kwargs)
-        kwargs = self.scatter(kwargs, self.device_ids)
+        kwargs = scatter_kwargs(kwargs, self.device_ids)
         if len(self.device_ids) == 1:
             return self.module(inputs, **kwargs[0])
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
@@ -161,6 +161,13 @@ class DataParallelCriterion(DataParallel):
         #return Reduce.apply(*outputs) / len(outputs)
         #return self.gather(outputs, self.output_device).mean()
         return self.gather(outputs, self.output_device)
+
+
+def scatter_kwargs(kwargs, target_gpus, dim=0):
+    r"""Scatter with support for kwargs dictionary"""
+    kwargs = scatter(kwargs, target_gpus, dim) if kwargs else []
+    kwargs = tuple(kwargs)
+    return kwargs
 
 
 def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
@@ -189,7 +196,7 @@ def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
                 # this also avoids accidental slicing of `input` if it is a Tensor
                 if not isinstance(input, (list, tuple)):
                     input = (input,)
-                output = module(*(input), **kwargs)
+                output = module(*input, **kwargs)
             with lock:
                 results[i] = output
         except Exception as e:

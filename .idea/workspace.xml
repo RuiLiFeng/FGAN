@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4aade3ec-06b5-4da1-8c83-35e7e5052228" name="Default Changelist" comment="" />
+    <list default="true" id="4aade3ec-06b5-4da1-8c83-35e7e5052228" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utils/parallel_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Utils/parallel_utils.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,11 +25,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sync_batchnorm/replicate.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-73">
+              <caret line="79" column="71" selection-start-line="79" selection-start-column="71" selection-end-line="79" selection-end-column="71" />
+              <folding>
+                <element signature="e#277#293#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="514">
-              <caret line="202" column="29" lean-forward="true" selection-start-line="202" selection-start-column="29" selection-end-line="202" selection-end-column="29" />
+              <caret line="205" column="50" lean-forward="true" selection-start-line="205" selection-start-column="50" selection-end-line="205" selection-end-column="50" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -37,8 +52,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="161">
-              <caret line="204" column="46" lean-forward="true" selection-start-line="204" selection-start-column="46" selection-end-line="204" selection-end-column="46" />
+            <state relative-caret-position="449">
+              <caret line="212" lean-forward="true" selection-start-line="212" selection-end-line="212" />
               <folding>
                 <element signature="e#61#77#0" expanded="true" />
               </folding>
@@ -47,36 +62,12 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Encoder.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1548">
-              <caret line="54" selection-start-line="54" selection-end-line="54" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Metric/inception_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="251" column="51" lean-forward="true" selection-start-line="251" selection-start-column="51" selection-end-line="251" selection-end-column="51" />
+            <state relative-caret-position="207">
+              <caret line="268" column="73" lean-forward="true" selection-start-line="268" selection-start-column="73" selection-end-line="268" selection-end-column="73" />
               <folding>
                 <element signature="e#738#756#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Utils/utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="20808">
-              <caret line="593" column="62" selection-start-line="593" selection-start-column="62" selection-end-line="593" selection-end-column="62" />
-              <folding>
-                <element signature="e#247#284#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -91,13 +82,22 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Utils/parallel_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="828">
-              <caret line="205" column="30" lean-forward="true" selection-start-line="205" selection-start-column="30" selection-end-line="205" selection-end-column="30" />
+            <state relative-caret-position="-4500">
+              <caret line="7" column="60" selection-start-line="7" selection-start-column="60" selection-end-line="7" selection-end-column="60" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sync_batchnorm/batchnorm.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="432">
+              <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
               <folding>
-                <element signature="e#0#16#0" expanded="true" />
+                <element signature="e#276#294#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -153,6 +153,7 @@
       <find>batch_size</find>
       <find>depth</find>
       <find>get_data</find>
+      <find>target</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -178,9 +179,9 @@
         <option value="$PROJECT_DIR$/Utils/vae_utils.py" />
         <option value="$PROJECT_DIR$/train_fgan_uncond.py" />
         <option value="$PROJECT_DIR$/Network/VaeGAN/Decoder.py" />
-        <option value="$PROJECT_DIR$/Utils/parallel_utils.py" />
         <option value="$PROJECT_DIR$/Network/VaeGAN/losses.py" />
         <option value="$PROJECT_DIR$/Training/train_vae_fns.py" />
+        <option value="$PROJECT_DIR$/Utils/parallel_utils.py" />
       </list>
     </option>
   </component>
@@ -228,6 +229,11 @@
               <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
               <item name="FGAN" type="462c0819:PsiDirectoryNode" />
               <item name="scripts" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
+              <item name="FGAN" type="462c0819:PsiDirectoryNode" />
+              <item name="sync_batchnorm" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="FGAN" type="b2602c69:ProjectViewProjectNode" />
@@ -319,12 +325,12 @@
       <workItem from="1569379083101" duration="1100000" />
       <workItem from="1569417497294" duration="375000" />
       <workItem from="1569417878487" duration="5552000" />
-      <workItem from="1569504461137" duration="4526000" />
+      <workItem from="1569504461137" duration="6599000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="90885000" />
+    <option name="totallyTimeSpent" value="92958000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -344,8 +350,8 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.27006507" />
-      <window_info anchor="bottom" id="Python Console" order="12" weight="0.34815618" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.27006507" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="12" visible="true" weight="0.112798266" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -475,16 +481,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sync_batchnorm/batchnorm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
-          <folding>
-            <element signature="e#276#294#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Network/BigGAN/layers.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="396">
@@ -496,16 +492,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="288">
           <caret line="8" column="30" selection-start-line="8" selection-start-column="30" selection-end-line="8" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sync_batchnorm/replicate.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2772">
-          <caret line="79" column="71" selection-start-line="79" selection-start-column="71" selection-end-line="79" selection-end-column="71" />
-          <folding>
-            <element signature="e#277#293#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -546,42 +532,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Metric/inception_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="251" column="51" lean-forward="true" selection-start-line="251" selection-start-column="51" selection-end-line="251" selection-end-column="51" />
-          <folding>
-            <element signature="e#738#756#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="161">
-          <caret line="204" column="46" lean-forward="true" selection-start-line="204" selection-start-column="46" selection-end-line="204" selection-end-column="46" />
-          <folding>
-            <element signature="e#61#77#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Network/VaeGAN/losses.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1091">
           <caret line="93" column="35" lean-forward="true" selection-start-line="93" selection-start-column="35" selection-end-line="93" selection-end-column="35" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Utils/parallel_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="828">
-          <caret line="205" column="30" lean-forward="true" selection-start-line="205" selection-start-column="30" selection-end-line="205" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -596,13 +552,60 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Network/VaeGAN/Decoder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="449">
+          <caret line="212" lean-forward="true" selection-start-line="212" selection-end-line="212" />
+          <folding>
+            <element signature="e#61#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sync_batchnorm/batchnorm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
+          <folding>
+            <element signature="e#276#294#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sync_batchnorm/replicate.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-73">
+          <caret line="79" column="71" selection-start-line="79" selection-start-column="71" selection-end-line="79" selection-end-column="71" />
+          <folding>
+            <element signature="e#277#293#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Metric/inception_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="207">
+          <caret line="268" column="73" lean-forward="true" selection-start-line="268" selection-start-column="73" selection-end-line="268" selection-end-column="73" />
+          <folding>
+            <element signature="e#738#756#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Training/train_vae_fns.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="514">
-          <caret line="202" column="29" lean-forward="true" selection-start-line="202" selection-start-column="29" selection-end-line="202" selection-end-column="29" />
+          <caret line="205" column="50" lean-forward="true" selection-start-line="205" selection-start-column="50" selection-end-line="205" selection-end-column="50" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Utils/parallel_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-4500">
+          <caret line="7" column="60" selection-start-line="7" selection-start-column="60" selection-end-line="7" selection-end-column="60" />
         </state>
       </provider>
     </entry>
