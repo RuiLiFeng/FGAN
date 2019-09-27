@@ -132,7 +132,7 @@ class DataParallelModel(DataParallel):
         return modules
 
 
-def scatter_kwargs(kwargs, target_gpus, dim=0):
+def _scatter_kwargs(kwargs, target_gpus, dim=0):
     r"""Scatter with support for kwargs dictionary"""
     kwargs = scatter(kwargs, target_gpus, dim) if kwargs else []
     kwargs = tuple(kwargs)
@@ -144,6 +144,9 @@ def _gather(outputs, target_device, dim=0):
     Gathers tensors from different GPUs on a specified device
       (-1 means the CPU).
     """
+    if all(out.dim() == 0 for out in outputs) and dim == 0:
+        outputs = [out.expand([1]) for out in outputs]
+
     def gather_map(outputs):
         out = outputs[0]
         if isinstance(out, torch.Tensor):
@@ -187,7 +190,7 @@ class DataParallelCriterion(DataParallel):
         # scattering the targets instead
         if not self.device_ids:
             return self.module(inputs, **kwargs)
-        kwargs = scatter_kwargs(kwargs, self.device_ids)
+        kwargs = _scatter_kwargs(kwargs, self.device_ids)
         if len(self.device_ids) == 1:
             return self.module(inputs, **kwargs[0])
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
@@ -195,7 +198,8 @@ class DataParallelCriterion(DataParallel):
         print(outputs)
         #return Reduce.apply(*outputs) / len(outputs)
         #return self.gather(outputs, self.output_device).mean()
-        return self.gather(outputs, self.output_device)
+        # return self.gather(outputs, self.output_device)
+        return _gather(outputs, self.output_device).mean()
 
 
 def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
