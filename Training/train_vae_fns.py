@@ -16,7 +16,7 @@ def dummy_training_function():
     return train
 
 
-def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_dict, vgg, config):
+def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_dict, config):
     def train(x):
         G.optim.zero_grad()
         D.optim.zero_grad()
@@ -89,7 +89,7 @@ def VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_, ema_list, state_d
                                                           x[counter], ey_, train_G=True, split_D=config['split_D'])
             G_loss_fake = losses.generator_loss(D_fake) * config['adv_loss_scale']
             Latent_loss = losses.latent_loss_gen(D_inv, D_en)
-            Recon_loss = losses.recon_loss(G_en, reals, vgg, config['recon_loss_scale'])
+            Recon_loss = losses.recon_loss(G_en, reals)
             G_loss = (G_loss_fake + Latent_loss + Recon_loss) / float(config['num_G_accumulations'])
             G_loss.backward()
             counter += 1
