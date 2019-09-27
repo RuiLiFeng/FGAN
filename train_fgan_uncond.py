@@ -38,9 +38,6 @@ def run(config):
         config['skip_init'] = True
     config = vae_utils.update_config_roots(config)
     device = 'cuda'
-    device1 = 'cuda:1'
-    device2 = 'cuda:2'
-    device3 = 'cuda:3'
 
     # Seed RNG
     utils.seed_rng(config['seed'])
@@ -149,7 +146,7 @@ def run(config):
     # Prepare vgg for recon_loss, considering loss is parallel, it's no need for vgg to be parallel
     vgg = load_vgg_from_local(parallel=False)
     # Prepare KNN for evaluating encoder.
-    KNN = vae_utils.KNN(loaders[0])
+    KNN = vae_utils.KNN(loaders[0], anchor_num=1, K=1)
     # Prepare noise and randomly sampled label arrays
     # Allow for different batch sizes in G
     G_batch_size = max(config['G_batch_size'], config['batch_size'])
