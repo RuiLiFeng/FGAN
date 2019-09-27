@@ -183,10 +183,12 @@ def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
 
     lock = threading.Lock()
     results = {}
+    print(kwargs_tup)
     if torch_ver != "0.3":
         grad_enabled = torch.is_grad_enabled()
 
     def _worker(i, module, input, kwargs, device=None):
+        print(kwargs)
         if torch_ver != "0.3":
             torch.set_grad_enabled(grad_enabled)
         if device is None:
