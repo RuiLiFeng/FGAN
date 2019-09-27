@@ -169,6 +169,21 @@ def _gather(outputs, target_device, dim=0):
     return res
 
 
+def gather_dict(dicts):
+    """
+    FTWS: Gather elemnets in a list of dicts to form the final output dict.
+    :param dicts:
+    :return:
+    """
+    d_out = {}
+    for key in dicts[0]:
+        d_out.update({key: 0.0})
+        for d in dicts:
+            d_out[key] += d[key]
+        d_out[key] = d_out[key] / len(dicts)
+    return d_out
+
+
 class DataParallelCriterion(DataParallel):
     """
     Calculate loss in multiple-GPUs, which balance the memory usage.
@@ -195,10 +210,13 @@ class DataParallelCriterion(DataParallel):
             return self.module(inputs, **kwargs[0])
         replicas = self.replicate(self.module, self.device_ids[:len(inputs)])
         outputs = _criterion_parallel_apply(replicas, inputs, kwargs)
+        out_losses = [loss for loss, _ in outputs]
+        out_dicts = [d for _, d in outputs]
+        out_dict = gather_dict(out_dicts)
         #return Reduce.apply(*outputs) / len(outputs)
         #return self.gather(outputs, self.output_device).mean()
         # return self.gather(outputs, self.output_device)
-        return _gather(outputs, self.output_device).mean()
+        return _gather(out_losses, self.output_device).mean(), out_dict
 
 
 def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
