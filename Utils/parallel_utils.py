@@ -156,8 +156,6 @@ class DataParallelCriterion(DataParallel):
     """
     # FTWS: We have removed 'targets' for parallel_loss
     def forward(self, inputs, **kwargs):
-        print("Inputs of parallel loss")
-        print(inputs)
         # input should be already scatterd
         # scattering the targets instead
         if not self.device_ids:
@@ -199,7 +197,7 @@ def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
                 # this also avoids accidental slicing of `input` if it is a Tensor
                 if not isinstance(input, (list, tuple)):
                     input = (input,)
-                output = module(*input, **kwargs)
+                output = module(input, **kwargs)
             with lock:
                 results[i] = output
         except Exception as e:
