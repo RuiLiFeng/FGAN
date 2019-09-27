@@ -164,7 +164,7 @@ def run(config):
     # Loaders are loaded, prepare the training function
     if config['which_train_fn'] == 'GAN':
         train = train_vae_fns.VAE_training_function(G, D, E, I, L, Decoder, z_, y_, ey_,
-                                                    [gema, iema, eema], state_dict, vgg, config)
+                                                    [gema, iema, eema], state_dict, config)
 
     # Else, assume debugging and use the dummy train fn
     else:
