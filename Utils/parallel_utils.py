@@ -132,6 +132,13 @@ class DataParallelModel(DataParallel):
         return modules
 
 
+def scatter_kwargs(kwargs, target_gpus, dim=0):
+    r"""Scatter with support for kwargs dictionary"""
+    kwargs = scatter(kwargs, target_gpus, dim) if kwargs else []
+    kwargs = tuple(kwargs)
+    return kwargs
+
+
 class DataParallelCriterion(DataParallel):
     """
     Calculate loss in multiple-GPUs, which balance the memory usage.
@@ -161,13 +168,6 @@ class DataParallelCriterion(DataParallel):
         #return Reduce.apply(*outputs) / len(outputs)
         #return self.gather(outputs, self.output_device).mean()
         return self.gather(outputs, self.output_device)
-
-
-def scatter_kwargs(kwargs, target_gpus, dim=0):
-    r"""Scatter with support for kwargs dictionary"""
-    kwargs = scatter(kwargs, target_gpus, dim) if kwargs else []
-    kwargs = tuple(kwargs)
-    return kwargs
 
 
 def _criterion_parallel_apply(modules, inputs, kwargs_tup=None, devices=None):
