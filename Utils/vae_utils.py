@@ -125,7 +125,7 @@ def sample(Invert, G, z_, y_, config):
         z_.sample_()
         y_.sample_()
         if config['parallel']:
-            v = nn.parallel.data_parallel(Invert(z_))
+            v = nn.parallel.data_parallel(Invert, z_)
             G_z = nn.parallel.data_parallel(G, (v, G.shared(y_)))
         else:
             v = Invert(z_)
