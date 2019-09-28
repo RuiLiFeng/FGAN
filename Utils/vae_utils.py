@@ -16,7 +16,7 @@ from Utils import utils
 from Dataset import datasets as dset, animal_hash
 
 
-def load_weights(net_list, state_dict, weights_root, experiment_name, load_whole=False,
+def load_weights(net_list, state_dict, weights_root, experiment_name,
                  name_suffix=None, ema_list=None, strict=True, load_optim=True):
     root = '/'.join([weights_root, experiment_name])
     if name_suffix:
