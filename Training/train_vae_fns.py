@@ -339,7 +339,7 @@ def test(G, D, E, I, L, KNN, G_ema, I_ema, E_ema, z_, y_, state_dict, config, sa
         print('%s improved over previous best, saving checkpoint...' % config['which_best'])
         vae_utils.save_weights([G, D, E, I, L], state_dict, config['weights_root'],
                                experiment_name, 'best%d' % state_dict['save_best_num'],
-                               G_ema if config['ema'] else None)
+                               [G_ema, I_ema, E_ema] if config['ema'] else None)
         state_dict['save_best_num'] = (state_dict['save_best_num'] + 1) % config['num_best_copies']
     state_dict['best_IS'] = max(state_dict['best_IS'], IS_mean)
     state_dict['best_FID'] = min(state_dict['best_FID'], FID)

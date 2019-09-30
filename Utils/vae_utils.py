@@ -24,24 +24,7 @@ def get_minidata_loaders(data_root='/gdata/fengrl/fgan/data', augment=False, bat
                      **kwargs):
     print('Using dataset root location %s' % data_root)
     which_dataset = mdset.MiniImagenet
-    norm_mean = [0.5, 0.5, 0.5]
-    norm_std = [0.5, 0.5, 0.5]
-    image_size = 84
-
-    if augment:
-        print('Data will be augmented...')
-        train_transform = [utils.RandomCropLongEdge(),
-                           transforms.Resize(image_size),
-                           transforms.RandomHorizontalFlip()]
-    else:
-        print('Data will not be augmented...')
-        train_transform = [utils.CenterCropLongEdge(), transforms.Resize(image_size)]
-        # train_transform = [transforms.Resize(image_size), transforms.CenterCrop]
-    train_transform = transforms.Compose(train_transform + [
-        transforms.ToTensor(),
-        transforms.Normalize(norm_mean, norm_std)])
-    train_set = which_dataset(root=data_root, transform=train_transform)
-
+    train_set = which_dataset(root=data_root, transform=None)
     # Prepare loader; the loaders list is for forward compatibility with
     # using validation / test splits.
     loaders = []
