@@ -3,7 +3,7 @@ import torch.utils.data as data
 import torch
 
 
-class MiniImagenet(data.dataset):
+class MiniImagenet(data.Dataset):
     def __init__(self, root, transform=None, target_transform=None, split='train', **kwargs):
         assert split in ['train', 'test', 'val']
         self.split = split
