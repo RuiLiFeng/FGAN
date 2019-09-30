@@ -40,6 +40,7 @@ class MiniImagenet(data.Dataset):
         # img = self.transform(img)
         # Apply my own transform
         img = ((torch.from_numpy(img).float() / 255) - 0.5) * 2
+        img = img.transpose(2, 0).transpose(1, 2)
 
         if self.target_transform is not None:
             target = self.target_transform(target)
