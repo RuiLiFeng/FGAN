@@ -2,24 +2,28 @@ import pickle
 import torch.utils.data as data
 import torch
 import numpy as np
+import h5py as h5
 
 
 class MiniImagenet(data.Dataset):
     def __init__(self, root, transform=None, target_transform=None, split='train', **kwargs):
         assert split in ['train', 'test', 'val']
         self.split = split
-        self.root = root + '/mini-imagenet-cache-%s.pkl' % split
+        self.root = root
+        self.index_root = '/gdata/fengrl/fgan/data/mini-imagenet-cache-train.pkl'
         print('Loading %s into memory...' % self.root)
-        with open(self.root, 'rb') as f:
+        with open(self.index_root, 'rb') as f:
             self.data = pickle.load(f)
-            self.img = self.data['image_data']
             self.class_dict = self.data['class_dict']
-        self.labels = []
+        self.index = []
         for key in self.class_dict:
-            self.labels += self.class_dict[key]
+            self.index += self.class_dict[key]
 
-        self.labels = np.asarray(self.labels)
-        self.num_imgs = len(self.img)
+        with h5.File(root, 'r') as f:
+            self.data = f['imgs'][self.index]
+            self.labels = f['labels'][self.index]
+
+        self.num_imgs = len(self.labels)
 
         # self.transform = transform
         self.target_transform = target_transform
@@ -35,14 +39,13 @@ class MiniImagenet(data.Dataset):
         Returns:
             tuple: (image, target) where target is class_index of the target class.
         """
-        img = self.img[index]
+        img = self.data[index]
         target = self.labels[index]
 
         # if self.transform is not None:
         # img = self.transform(img)
         # Apply my own transform
         img = ((torch.from_numpy(img).float() / 255) - 0.5) * 2
-        img = img.transpose(2, 0).transpose(1, 2)
 
         if self.target_transform is not None:
             target = self.target_transform(target)

@@ -17,14 +17,50 @@ from Dataset import datasets as dset, animal_hash
 from Dataset import mini_datasets as mdset
 
 
-def get_minidata_loaders(data_root='/gdata/fengrl/fgan/data', augment=False, batch_size=64,
+def get_minidata_loaders(dataset, data_root=None, augment=False, batch_size=64,
                      num_workers=8, shuffle=True, load_in_mem=False, hdf5=False,
                      pin_memory=True, drop_last=True, start_itr=0,
                      num_epochs=500, use_multiepoch_sampler=False,
+                     index_dir='/gpub/temp/imagenet2012/hdf5',
                      **kwargs):
+    # Append /FILENAME.hdf5 to root if using hdf5
+    data_root += '/%s' % 'ILSVRC128.hdf5'
     print('Using dataset root location %s' % data_root)
+
     which_dataset = mdset.MiniImagenet
-    train_set = which_dataset(root=data_root, transform=None)
+    norm_mean = [0.5, 0.5, 0.5]
+    norm_std = [0.5, 0.5, 0.5]
+    image_size = 128
+    # For image folder datasets, name of the file where we store the precomputed
+    # image locations to avoid having to walk the dirs every time we load.
+    dataset_kwargs = {'index_filename': '%s/%s_imgs.npz' % (index_dir, dataset)}
+
+    # HDF5 datasets have their own inbuilt transform, no need to train_transform
+    if 'hdf5' in dataset:
+        train_transform = None
+    else:
+        if augment:
+            print('Data will be augmented...')
+            if dataset in ['C10', 'C100']:
+                train_transform = [transforms.RandomCrop(32, padding=4),
+                                   transforms.RandomHorizontalFlip()]
+            else:
+                train_transform = [utils.RandomCropLongEdge(),
+                                   transforms.Resize(image_size),
+                                   transforms.RandomHorizontalFlip()]
+        else:
+            print('Data will not be augmented...')
+            if dataset in ['C10', 'C100']:
+                train_transform = []
+            else:
+                train_transform = [utils.CenterCropLongEdge(), transforms.Resize(image_size)]
+            # train_transform = [transforms.Resize(image_size), transforms.CenterCrop]
+        train_transform = transforms.Compose(train_transform + [
+            transforms.ToTensor(),
+            transforms.Normalize(norm_mean, norm_std)])
+    train_set = which_dataset(root=data_root, transform=train_transform,
+                              load_in_mem=load_in_mem, **dataset_kwargs)
+
     # Prepare loader; the loaders list is for forward compatibility with
     # using validation / test splits.
     loaders = []

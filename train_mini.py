@@ -29,8 +29,8 @@ def run(config):
     # configuration into the config-dict (e.g. inferring the number of classes
     # and size of the images from the dataset, passing in a pytorch object
     # for the activation specified as a string)
-    config['resolution'] = 84
-    config['n_classes'] = 64
+    config['resolution'] = utils.imsize_dict[config['dataset']]
+    config['n_classes'] = utils.nclass_dict[config['dataset']]
     config['G_activation'] = utils.activation_dict[config['G_nl']]
     config['D_activation'] = utils.activation_dict[config['D_nl']]
     # By default, skip init if resuming training.
@@ -140,8 +140,10 @@ def run(config):
                                                 'start_itr': state_dict['itr']})
 
     # Prepare inception metrics: FID and IS
-    get_inception_metrics = inception_utils.prepare_inception_metrics('MiniImagenet', config['parallel'],
-                                                                      config['data_root'] + '/', config['no_fid'])
+    get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'],
+                                                                      config['parallel'],
+                                                                      config['data_root'],
+                                                                      config['no_fid'])
     # Prepare vgg for recon_loss, considering loss is parallel, it's no need for vgg to be parallel
     # vgg is pretrained on imagenet, so we cannot use it.
     # vgg = load_vgg_from_local(parallel=False)
