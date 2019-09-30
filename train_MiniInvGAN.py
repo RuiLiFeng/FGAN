@@ -125,9 +125,9 @@ def run(config):
                                               'start_itr': state_dict['itr']})
 
   # Prepare inception metrics: FID and IS
-  get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'],
+  get_inception_metrics = inception_utils.prepare_inception_metrics('MiniImagenet',
                                                                     config['parallel'],
-                                                                    config['data_root'],
+                                                                    config['data_root'] + '/',
                                                                     config['no_fid'])
 
   # Prepare noise and randomly sampled label arrays
