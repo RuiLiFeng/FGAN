@@ -8,8 +8,8 @@ class MiniImagenet(data.Dataset):
         assert split in ['train', 'test', 'val']
         self.split = split
         self.root = root + '/mini-imagenet-cache-%s.pkl' % split
-        print('Loading %s into memory...' % root)
-        with open(root, 'r') as f:
+        print('Loading %s into memory...' % self.root)
+        with open(self.root, 'r') as f:
             self.data = pickle.load(f)
             self.img = self.data['image_data']
             self.class_dict = self.data['class_dict']
