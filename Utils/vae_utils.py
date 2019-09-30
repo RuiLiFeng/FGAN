@@ -14,6 +14,50 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from Utils import utils
 from Dataset import datasets as dset, animal_hash
+from Dataset import mini_datasets as mdset
+
+
+def get_minidata_loaders(data_root='/gdata/fengrl/fgan/data', augment=False, batch_size=64,
+                     num_workers=8, shuffle=True, load_in_mem=False, hdf5=False,
+                     pin_memory=True, drop_last=True, start_itr=0,
+                     num_epochs=500, use_multiepoch_sampler=False,
+                     **kwargs):
+    print('Using dataset root location %s' % data_root)
+    which_dataset = mdset.MiniImagenet
+    norm_mean = [0.5, 0.5, 0.5]
+    norm_std = [0.5, 0.5, 0.5]
+    image_size = 84
+
+    if augment:
+        print('Data will be augmented...')
+        train_transform = [utils.RandomCropLongEdge(),
+                           transforms.Resize(image_size),
+                           transforms.RandomHorizontalFlip()]
+    else:
+        print('Data will not be augmented...')
+        train_transform = [utils.CenterCropLongEdge(), transforms.Resize(image_size)]
+        # train_transform = [transforms.Resize(image_size), transforms.CenterCrop]
+    train_transform = transforms.Compose(train_transform + [
+        transforms.ToTensor(),
+        transforms.Normalize(norm_mean, norm_std)])
+    train_set = which_dataset(root=data_root, transform=train_transform)
+
+    # Prepare loader; the loaders list is for forward compatibility with
+    # using validation / test splits.
+    loaders = []
+    if use_multiepoch_sampler:
+        print('Using multiepoch sampler from start_itr %d...' % start_itr)
+        loader_kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory}
+        sampler = utils.MultiEpochSampler(train_set, num_epochs, start_itr, batch_size)
+        train_loader = DataLoader(train_set, batch_size=batch_size,
+                                  sampler=sampler, **loader_kwargs)
+    else:
+        loader_kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory,
+                         'drop_last': drop_last}  # Default, drop last incomplete batch
+        train_loader = DataLoader(train_set, batch_size=batch_size,
+                                  shuffle=shuffle, **loader_kwargs)
+    loaders.append(train_loader)
+    return loaders
 
 
 def load_weights(net_list, state_dict, weights_root, experiment_name,
