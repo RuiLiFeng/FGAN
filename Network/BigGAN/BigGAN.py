@@ -32,6 +32,12 @@ def G_arch(ch=64, attention='64', ksize='333333', dilation='111111'):
                'resolution' : [8, 16, 32, 64, 128],
                'attention' : {2**i: (2**i in [int(item) for item in attention.split('_')])
                               for i in range(3,8)}}
+  arch[84] = {'in_channels' :  [ch * item for item in [16, 16, 8, 4]],
+               'out_channels' : [ch * item for item in [16, 8, 4, 2]],
+               'upsample' : [True] * 4,
+               'resolution' : [8, 16, 32, 64],
+               'attention' : {2**i: (2**i in [int(item) for item in attention.split('_')])
+                              for i in range(3,7)}}
   arch[64]  = {'in_channels' :  [ch * item for item in [16, 16, 8, 4]],
                'out_channels' : [ch * item for item in [16, 8, 4, 2]],
                'upsample' : [True] * 4,
