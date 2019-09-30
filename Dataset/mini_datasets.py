@@ -1,6 +1,7 @@
 import pickle
 import torch.utils.data as data
 import torch
+import numpy as np
 
 
 class MiniImagenet(data.Dataset):
@@ -17,6 +18,7 @@ class MiniImagenet(data.Dataset):
         for key in self.class_dict:
             self.labels += self.class_dict[key]
 
+        self.labels = np.asarray(self.labels)
         self.num_imgs = len(self.img)
 
         # self.transform = transform
