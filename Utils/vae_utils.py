@@ -158,7 +158,7 @@ class KNN(object):
                 y_arg = dist.argsort(1)
                 for k in range(self.K):
                     y_ = self.anchor_label[y_arg[:, k]]
-                    precision += 1.0 * (y_ == y) / y.shape[0]
+                    precision += (y_ == y).sum().astype('float32') / y.shape[0]
                 precision = float(precision / self.K)
             del x, y, v
         return precision / self.sample_batch
