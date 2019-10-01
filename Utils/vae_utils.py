@@ -144,7 +144,7 @@ class KNN(object):
         """
         FTWS: return dict as out in train_fns.
         """
-        precision = 0
+        precision = 0.0
         with torch.no_grad():
             anchor_v = encoder(self.anchor).split(1, 0)
             for i, (x, y) in enumerate(self.dataloader):
@@ -158,7 +158,7 @@ class KNN(object):
                 y_arg = dist.argsort(1)
                 for k in range(self.K):
                     y_ = self.anchor_label[y_arg[:, k]]
-                    precision += (y_ == y).sum().astype('float32') / y.shape[0]
+                    precision += (torch.tensor(y_) == torch.tensor(y)).sum().type_as(x) / y.shape[0]
                 precision = float(precision / self.K)
             del x, y, v
         return precision / self.sample_batch
