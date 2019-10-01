@@ -145,7 +145,7 @@ class KNN(object):
         FTWS: return dict as out in train_fns.
         """
         precision = 0
-        with torch.no_grad:
+        with torch.no_grad():
             anchor_v = encoder(self.anchor).split(1, 0)
             for i, (x, y) in enumerate(self.dataloader):
                 if i > self.sample_batch:
