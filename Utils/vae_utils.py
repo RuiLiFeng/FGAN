@@ -133,11 +133,14 @@ class KNN(object):
                  dataloader,
                  K=5,
                  sample_batch=10,
-                 anchor_num=10):
+                 anchor_num=10,
+                 device='cuda'):
         self.K = K
         assert K <= anchor_num
+        self.device = device
         self.sample_batch = sample_batch
         self.anchor, self.anchor_label = make_anchor(dataloader, anchor_num)
+        self.anchor.to(self.device)
         self.dataloader = dataloader
 
     def __call__(self, encoder):

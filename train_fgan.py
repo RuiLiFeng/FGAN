@@ -146,7 +146,8 @@ def run(config):
     # vgg is pretrained on imagenet, so we cannot use it.
     # vgg = load_vgg_from_local(parallel=False)
     # Prepare KNN for evaluating encoder.
-    KNN = vae_utils.KNN(loaders[0], anchor_num=10, K=4)
+    # KNN = vae_utils.KNN(loaders[0], anchor_num=10, K=4)
+    KNN = None
     # Prepare noise and randomly sampled label arrays
     # Allow for different batch sizes in G
     G_batch_size = max(config['G_batch_size'], config['batch_size'])

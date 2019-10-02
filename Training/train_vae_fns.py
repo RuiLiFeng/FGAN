@@ -343,7 +343,10 @@ def test(G, D, E, I, L, KNN, G_ema, I_ema, E_ema, z_, y_, state_dict, config, sa
         state_dict['save_best_num'] = (state_dict['save_best_num'] + 1) % config['num_best_copies']
     state_dict['best_IS'] = max(state_dict['best_IS'], IS_mean)
     state_dict['best_FID'] = min(state_dict['best_FID'], FID)
-    KNN_precision = KNN(E_ema if config['ema'] and config['use_ema'] else E)
+    if KNN is not None:
+        KNN_precision = KNN(E_ema if config['ema'] and config['use_ema'] else E)
+    else:
+        KNN_precision = 0.0
     # Log results to file
     test_log.log(itr=int(state_dict['itr']), IS_mean=float(IS_mean),
                  IS_std=float(IS_std), FID=float(FID), KNN_precision=float(KNN_precision))
