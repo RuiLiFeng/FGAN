@@ -66,7 +66,7 @@ def get_minidata_loaders(dataset, data_root=None, augment=False, batch_size=64,
     loaders = []
     if use_multiepoch_sampler:
         print('Using multiepoch sampler from start_itr %d...' % start_itr)
-        loader_kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory}
+        loader_kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory, 'drop_last': drop_last}
         sampler = utils.MultiEpochSampler(train_set, num_epochs, start_itr, batch_size)
         train_loader = DataLoader(train_set, batch_size=batch_size,
                                   sampler=sampler, **loader_kwargs)
