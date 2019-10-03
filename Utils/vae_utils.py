@@ -24,7 +24,7 @@ def get_minidata_loaders(dataset, data_root=None, augment=False, batch_size=64,
                      index_dir='/gpub/temp/imagenet2012/hdf5',
                      **kwargs):
     # Append /FILENAME.hdf5 to root if using hdf5
-    data_root += '/%s' % 'ILSVRC128.hdf5'
+    data_root += '/%s' % utils.root_dict[dataset]
     print('Using dataset root location %s' % data_root)
 
     which_dataset = mdset.MiniImagenet
