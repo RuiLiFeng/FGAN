@@ -17,7 +17,7 @@ class Extractor(nn.Module):
     def __init__(self, n_class=1000, E_init='ortho', name=None, Ex_lr=2e-4, adam_eps=1e-8,
                  Ex_B1=0.0, Ex_B2=0.999, skip_init=False, **kwargs):
         super(Extractor, self).__init__()
-        self.ResNet = ResNet(Bottleneck, [3, 4, 6, 3], width_per_group=64*16)
+        self.ResNet = ResNet(Bottleneck, [3, 4, 6, 3], width_per_group=64*2)
         self.init = E_init
         self.c_r = nn.Linear(512*4, NUM_ROTATIONS)
         self.s2l = nn.Linear(512*4, n_class)
