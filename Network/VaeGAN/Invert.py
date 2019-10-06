@@ -69,10 +69,11 @@ class step(nn.Module):
         self.phi = phi(in_channels // 2, in_channels // 2, **kwargs)
 
     def _reverse(self, x, axis=1):
-        indices = [slice(None)] * x.dim()
-        indices[axis] = torch.arange(x.size(axis) - 1, -1, -1,
-                                     dtype=torch.long, device=x.device)
-        return x[tuple(indices)]
+        # indices = [slice(None)] * x.dim()
+        # indices[axis] = torch.arange(x.size(axis) - 1, -1, -1,
+        #                              dtype=torch.long, device=x.device)
+        # return x[tuple(indices)]
+        return torch.flip(x, (axis,))
 
     def forward(self, x):
         assert len(x.shape) == 2

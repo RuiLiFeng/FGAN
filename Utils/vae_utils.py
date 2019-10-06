@@ -307,3 +307,16 @@ def interp_sheet(G, I, num_per_sheet, num_midpoints, num_classes, parallel,
                                                   sheet_number)
     torchvision.utils.save_image(out_ims, image_filename,
                                  nrow=num_midpoints + 2, normalize=True)
+
+
+def general_one_hot(y, n_classes):
+    """
+    -1 marks samples which dont have labels, this function will convert them into [0,...,0]
+    :param y:
+    :param n_classes:
+    :return:
+    """
+    y = y + 1
+    y_one_hot = torch.nn.functional.one_hot(y, n_classes+1)
+    y_one_hot = y_one_hot[:, 1:]
+    return y_one_hot

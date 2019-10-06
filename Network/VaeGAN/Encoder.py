@@ -8,7 +8,7 @@ from torch.nn import init
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.nn import Parameter as P
-from torchvision.models.resnet import Bottleneck, ResNet
+from Network.VaeGAN.ResNet import Bottleneck, ResNet
 from Network.BigGAN import layers
 
 
@@ -19,9 +19,9 @@ class Encoder_inv(ResNet):
     In further development, this Network will be adopted to the prop of labeled imgs and automatically reform its dept
     -hs.
     """
-    def __init__(self, dim_z, skip_init=False, E_lr=2e-4, E_init='ortho',
+    def __init__(self, dim_z, skip_init=False, E_lr=2e-4, E_init='ortho', widden_factor=2,
                  adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None, **kwargs):
-        super(Encoder_inv, self).__init__(Bottleneck, [3, 4, 6, 4])
+        super(Encoder_inv, self).__init__(Bottleneck, [3, 4, 6, 3], width_per_group=64*widden_factor)
         self.downsample = nn.Sequential(
             nn.Conv2d(512 * 4, dim_z, kernel_size=1, stride=1, bias=False),
             nn.BatchNorm2d(dim_z))
@@ -89,7 +89,7 @@ class Encoder_inv(ResNet):
 class Encoder_rd(ResNet):
     def __init__(self, dim_z, skip_init=False, E_lr=2e-4,
                  adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None, **kwargs):
-        super(Encoder_rd, self).__init__(Bottleneck, [3, 4, 6, 4])
+        super(Encoder_rd, self).__init__(Bottleneck, [3, 4, 6, 3], width_per_group=64*16)
         self.resblock1 = ResBlock(512 * 4, dim_z * 2)
         self.resblock2 = ResBlock(dim_z * 2, dim_z * 2)
         if not skip_init:
