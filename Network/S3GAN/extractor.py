@@ -18,6 +18,7 @@ class Extractor(nn.Module):
                  Ex_B1=0.0, Ex_B2=0.999, skip_init=False, **kwargs):
         super(Extractor, self).__init__()
         self.ResNet = ResNet(Bottleneck, [3, 4, 6, 3], width_per_group=64*2)
+        del self.ResNet.fc
         self.init = E_init
         self.c_r = nn.Linear(512*4, NUM_ROTATIONS)
         self.s2l = nn.Linear(512*4, n_class)
@@ -50,17 +51,17 @@ class Extractor(nn.Module):
     def forward(self, x, y):
         img_num = x.shape[0]
         x, y, ry = merge_with_rotation_data(x, y, img_num)
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
-        x = self.maxpool(x)
+        x = self.ResNet.conv1(x)
+        x = self.ResNet.bn1(x)
+        x = self.ResNet.relu(x)
+        x = self.ResNet.maxpool(x)
 
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+        x = self.ResNet.layer1(x)
+        x = self.ResNet.layer2(x)
+        x = self.ResNet.layer3(x)
+        x = self.ResNet.layer4(x)
 
-        x = self.avgpool(x)
+        x = self.ResNet.avgpool(x)
         x = torch.flatten(x, 1)
         rot_logits = self.c_r(x)
         s2l_logits = self.s2l(x)
