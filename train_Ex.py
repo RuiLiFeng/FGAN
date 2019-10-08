@@ -130,6 +130,8 @@ def run(config):
     else:
       pbar = tqdm(zip(loaders[0], loaders[1]))
     for i, (lx, ly, ux, uy) in enumerate(pbar):
+      x = torch.cat([lx, ux], 0)
+      y = torch.cat([ly, uy])
       # Increment the iteration counter
       state_dict['itr'] += 1
       # Make sure G and D are in training mode, just in case they got set to eval
@@ -137,7 +139,7 @@ def run(config):
       E.train()
       ## Last night we process here!
       if config['ema']:
-        G_ema.train()
+        E_ema.train()
       if config['D_fp16']:
         x, y = x.to(device).half(), y.to(device)
       else:
