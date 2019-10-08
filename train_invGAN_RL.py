@@ -135,7 +135,7 @@ def run(config):
   G_batch_size = max(config['G_batch_size'], config['batch_size'])
   z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
                              device=device, fp16=config['G_fp16'])
-  _, ry_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
+  _, ry_ = utils.prepare_z_y(D_batch_size, G.dim_z, config['n_classes'],
                              device=device, fp16=config['G_fp16'])
   # Prepare a fixed z & y to see individual sample evolution throghout training
   fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
