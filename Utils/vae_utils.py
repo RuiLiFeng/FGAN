@@ -67,7 +67,6 @@ def SL_training_function(G, D, GD, z_, y_, ema, state_dict, config):
         # If accumulating gradients, loop multiple times
         for accumulation_index in range(config['num_G_accumulations']):
             z_.sample_()
-            y_.sample_()
             D_fake = GD(z_, y_, train_G=True, split_D=config['split_D'])
             G_loss = losses.generator_loss(D_fake) / float(config['num_G_accumulations'])
             G_loss.backward()
