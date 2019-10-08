@@ -13,6 +13,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from Utils import utils
+from Network.BigGAN import losses
 from Dataset import datasets as dset, animal_hash
 from Dataset import mini_datasets as mdset
 
