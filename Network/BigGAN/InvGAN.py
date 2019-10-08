@@ -37,7 +37,7 @@ class Discriminator(BigGAN.Discriminator):
         # UNLABEL = -1
         # y_index = torch.nonzero(y == UNLABEL)
         # y = y[y_index]
-        # out = out + torch.sum(self.embed(y) * h, 1, keepdim=True)
+        out = out + torch.sum(self.embed(y) * h, 1, keepdim=True)
         return out
 
 
