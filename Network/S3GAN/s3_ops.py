@@ -31,8 +31,8 @@ def merge_with_rotation_data(images, labels, num_rot_examples):
     img_rotated_labels = labels[-num_rot_examples:].repeat(3)
     all_img = torch.cat([images, img_rotated], 0)
     all_labels = torch.cat([labels, img_rotated_labels], 0)
-    labels_rotated = tile(torch.tensor([1, 2, 3], dtype=torch.float32), 0, num_rot_examples)
-    all_labels_rotated = torch.cat([torch.zeros_like(labels, dtype=torch.float32), labels_rotated], 0)
+    labels_rotated = tile(torch.tensor([1, 2, 3], dtype=labels.dtype), 0, num_rot_examples)
+    all_labels_rotated = torch.cat([torch.zeros_like(labels), labels_rotated], 0)
     return all_img, all_labels, all_labels_rotated
 
 

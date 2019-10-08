@@ -139,7 +139,8 @@ class KNN(object):
         assert K <= anchor_num
         self.device = device
         self.sample_batch = sample_batch
-        self.anchor, self.anchor_label = make_anchor(dataloader, anchor_num)
+        dataset = dataloader.dataset
+        self.anchor, self.anchor_label, self.index = make_anchor(dataset, anchor_num)
         self.anchor.to(self.device)
         self.dataloader = dataloader
 
@@ -167,8 +168,7 @@ class KNN(object):
         return precision / self.sample_batch
 
 
-def make_anchor(dataloader, anchor_num):
-    dataset = dataloader.dataset
+def make_anchor(dataset, anchor_num):
     anchor_list = []
     counter = 0
     label_record = 0
@@ -182,7 +182,27 @@ def make_anchor(dataloader, anchor_num):
             label_record = label
             anchor_list.append(index)
             counter = 1
-    return dataset[anchor_list]
+    return dataset['imgs'][anchor_list], dataset['labels'][anchor_list], anchor_list
+
+
+def make_index_per_class(dataset, anchor_num):
+    anchor_list = []
+    remain_list = []
+    counter = 0
+    label_record = 0
+    print("Generating Few shot anchor with %d anchors per class." % anchor_num)
+    for index in range(len(dataset)):
+        label = dataset[index]
+        if counter < anchor_num:
+            anchor_list.append(index)
+            counter += 1
+        elif label != label_record:
+            label_record = label
+            anchor_list.append(index)
+            counter = 1
+        else:
+            remain_list.append(index)
+    return anchor_list, remain_list
 
 
 # Sample function for use with inception metrics

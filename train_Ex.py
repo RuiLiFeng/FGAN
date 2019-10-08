@@ -17,7 +17,7 @@ import torch.nn as nn
 from Metric import inception_utils
 from Utils import utils, vae_utils
 from Dataset import mini_datasets
-
+from Network.S3GAN import extractor as Ex
 from Training import train_fns
 from sync_batchnorm import patch_replication_callback
 from importlib import import_module
@@ -52,39 +52,25 @@ def run(config):
   torch.backends.cudnn.benchmark = True
 
   # Import the model--this line allows us to dynamically select different files.
-  model = import_module('Network.' + config['model'])
   experiment_name = (config['experiment_name'] if config['experiment_name']
                        else utils.name_from_config(config))
   print('Experiment name is %s' % experiment_name)
 
   # Next, build the model
-  G = model.Generator(**config).to(device)
-  D = model.Discriminator(**config).to(device)
-  
-   # If using EMA, prepare it
+  E = Ex.Extractor(**config).to(device)
+
+  # If using EMA, prepare it
   if config['ema']:
-    print('Preparing EMA for G with decay of {}'.format(config['ema_decay']))
-    G_ema = model.Generator(**{**config, 'skip_init':True, 
-                               'no_optim': True}).to(device)
-    ema = utils.ema(G, G_ema, config['ema_decay'], config['ema_start'])
+    print('Preparing EMA for E with decay of {}'.format(config['ema_decay']))
+    E_ema = Ex.Extractor(**{**config, 'skip_init':True,
+                            'no_optim': True}).to(device)
+    ema = utils.ema(E, E_ema, config['ema_decay'], config['ema_start'])
   else:
-    G_ema, ema = None, None
-  
-  # FP16?
-  if config['G_fp16']:
-    print('Casting G to float16...')
-    G = G.half()
-    if config['ema']:
-      G_ema = G_ema.half()
-  if config['D_fp16']:
-    print('Casting D to fp16...')
-    D = D.half()
-    # Consider automatically reducing SN_eps?
-  GD = model.G_D(G, D)
-  print(G)
-  print(D)
-  print('Number of params in G: {} D: {}'.format(
-    *[sum([p.data.nelement() for p in net.parameters()]) for net in [G,D]]))
+    E_ema, ema = None, None
+
+  print(E)
+  print('Number of params in E: {}'.format(
+    sum([p.data.nelement() for p in E.parameters()])))
   # Prepare state dict, which holds things like epoch # and itr #
   state_dict = {'itr': 0, 'epoch': 0, 'save_num': 0, 'save_best_num': 0,
                 'best_IS': 0, 'best_FID': 999999, 'config': config}
@@ -92,16 +78,16 @@ def run(config):
   # If loading from a pre-trained model, load weights
   if config['resume']:
     print('Loading weights...')
-    utils.load_weights(G, D, state_dict,
-                       config['weights_root'], experiment_name,
-                       config['load_weights'] if config['load_weights'] else None,
-                       G_ema if config['ema'] else None)
+    vae_utils.load_weights([E], state_dict,
+                           config['weights_root'], experiment_name,
+                           config['load_weights'] if config['load_weights'] else None,
+                           [E_ema] if config['ema'] else None)
 
   # If parallel, parallelize the GD module
   if config['parallel']:
-    GD = nn.DataParallel(GD)
+    E_parallel = nn.DataParallel(E)
     if config['cross_replica']:
-      patch_replication_callback(GD)
+      patch_replication_callback(E_parallel)
 
   # Prepare loggers for stats; metrics holds test metrics,
   # lmetrics holds any desired training metrics.
@@ -121,56 +107,35 @@ def run(config):
   # to the dataloader, as G doesn't require dataloading.
   # Note that at every loader iteration we pass in enough data to complete
   # a full D iteration (regardless of number of D steps and accumulations)
-  D_batch_size = (config['batch_size'] * config['num_D_steps']
-                  * config['num_D_accumulations'])
-  loaders = utils.get_data_loaders(**{**config, 'batch_size': D_batch_size,
-                                      'start_itr': state_dict['itr']})
-
-  # Prepare inception metrics: FID and IS
-  get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'],
-                                                                    config['parallel'],
-                                                                    config['data_root'],
-                                                                    config['no_fid'])
+  D_batch_size = (config['batch_size'] * 8)
+  loaders = mini_datasets.get_data_loaders(**{**config, 'batch_size': D_batch_size,
+                                              'start_itr': state_dict['itr']})
 
   # Prepare noise and randomly sampled label arrays
   # Allow for different batch sizes in G
   G_batch_size = max(config['G_batch_size'], config['batch_size'])
-  z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
-                             device=device, fp16=config['G_fp16'])
-  # Prepare a fixed z & y to see individual sample evolution throghout training
-  fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
-                                       config['n_classes'], device=device,
-                                       fp16=config['G_fp16'])  
-  fixed_z.sample_()
-  fixed_y.sample_()
   # Loaders are loaded, prepare the training function
   if config['which_train_fn'] == 'GAN':
-    train = train_fns.GAN_training_function(G, D, GD, z_, y_,
-                                            ema, state_dict, config)
+    train = Ex.Extractor_training_function(E, ema, E_parallel, state_dict, config)
   # Else, assume debugging and use the dummy train fn
   else:
     train = train_fns.dummy_training_function()
-  # Prepare Sample function for use with inception metrics
-  sample = functools.partial(utils.sample,
-                             G=(G_ema if config['ema'] and config['use_ema']
-                                 else G),
-                             z_=z_, y_=y_, config=config)
 
   print('Beginning training at epoch %d...' % state_dict['epoch'])
   # Train for specified number of epochs, although we mostly track G iterations.
   for epoch in range(state_dict['epoch'], config['num_epochs']):    
     # Which progressbar to use? TQDM or my own?
     if config['pbar'] == 'mine':
-      pbar = utils.progress(loaders[0], displaytype='s1k' if config['use_multiepoch_sampler'] else 'eta')
+      pbar = utils.progress(zip(loaders[0], loaders[1]), displaytype='s1k' if config['use_multiepoch_sampler'] else 'eta')
     else:
-      pbar = tqdm(loaders[0])
-    for i, (x, y) in enumerate(pbar):
+      pbar = tqdm(zip(loaders[0], loaders[1]))
+    for i, (lx, ly, ux, uy) in enumerate(pbar):
       # Increment the iteration counter
       state_dict['itr'] += 1
       # Make sure G and D are in training mode, just in case they got set to eval
       # For D, which typically doesn't have BN, this shouldn't matter much.
-      G.train()
-      D.train()
+      E.train()
+      ## Last night we process here!
       if config['ema']:
         G_ema.train()
       if config['D_fp16']:
