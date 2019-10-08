@@ -133,11 +133,10 @@ def run(config):
   # Prepare noise and randomly sampled label arrays
   # Allow for different batch sizes in G
   G_batch_size = max(config['G_batch_size'], config['batch_size'])
-  z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
-                             device=device, fp16=config['G_fp16'])
-  # Use random label!
-  _, ry_ = utils.prepare_z_y(D_batch_size, G.dim_z, config['n_classes'],
-                             device=device, fp16=config['G_fp16'])
+  z_, _ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
+                            device=device, fp16=config['G_fp16'])
+  # Single Label!
+  y_ = torch.ones(G_batch_size, dtype=torch.int64, requires_grad=False).to(device)
   # Prepare a fixed z & y to see individual sample evolution throghout training
   fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
                                        config['n_classes'], device=device,
@@ -146,7 +145,7 @@ def run(config):
   fixed_y.sample_()
   # Loaders are loaded, prepare the training function
   if config['which_train_fn'] == 'GAN':
-    train = train_fns.GAN_training_function(G, D, GD, z_, y_,
+    train = vae_utils.SL_training_function(G, D, GD, z_, y_,
                                             ema, state_dict, config)
   # Else, assume debugging and use the dummy train fn
   else:
@@ -178,8 +177,8 @@ def run(config):
         x, y = x.to(device).half(), y.to(device)
       else:
         x, y = x.to(device), y.to(device)
-      ry_.sample_()
-      metrics = train(x, ry_)
+      y = torch.ones_like(y).to(device)
+      metrics = train(x, y)
       train_log.log(itr=int(state_dict['itr']), **metrics)
       
       # Every sv_log_interval, log singular values
