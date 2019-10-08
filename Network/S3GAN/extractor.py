@@ -14,12 +14,12 @@ NUM_ROTATIONS = 4
 
 
 class Extractor(nn.Module):
-    def __init__(self, n_class=1000, E_init='ortho', name=None, Ex_lr=2e-4, adam_eps=1e-8,
+    def __init__(self, n_class=1000, Ex_init='ortho', name=None, Ex_lr=2e-4, adam_eps=1e-8,
                  Ex_B1=0.0, Ex_B2=0.999, skip_init=False, **kwargs):
         super(Extractor, self).__init__()
         self.ResNet = ResNet(Bottleneck, [3, 4, 6, 3], width_per_group=64*2)
         del self.ResNet.fc
-        self.init = E_init
+        self.init = Ex_init
         self.c_r = nn.Linear(512*4, NUM_ROTATIONS)
         self.s2l = nn.Linear(512*4, n_class)
         self.name = 'Extractor' if name is None else name
@@ -68,29 +68,32 @@ class Extractor(nn.Module):
         return rot_logits, s2l_logits, y, ry
 
 
-def extractor_loss(rot_logits, s2l_logits, y, ry, n_classes):
-    rot_prop = torch.nn.functional.log_softmax(rot_logits)
-    s2l_prop = torch.nn.functional.log_softmax(s2l_logits)
-    ry_one_hot = torch.nn.functional.one_hot(ry, NUM_ROTATIONS)
-    y_one_hot = vae_utils.general_one_hot(y, n_classes)  # y_one_hot[i]=[0,....,0] if the i-th element in this batch
+def extractor_loss(rot_logits, s2l_logits, y, ry):
+    n_classes = s2l_logits.shape[1]
+    rot_prop = torch.nn.functional.log_softmax(rot_logits, 1)
+    s2l_prop = torch.nn.functional.log_softmax(s2l_logits, 1)
+    ry_one_hot = torch.nn.functional.one_hot(ry, NUM_ROTATIONS).type_as(rot_prop)
+    # y_one_hot[i]=[0,....,0] if the i-th element in this batch
     # has no label, that is, y[i] = -1
-    rot_loss = rot_prop * ry_one_hot / NUM_ROTATIONS
-    s2l_loss = s2l_prop * y_one_hot / NUM_ROTATIONS
+    y_one_hot = vae_utils.general_one_hot(y, n_classes).type_as(s2l_prop)
+
+    rot_loss = torch.sum(rot_prop * ry_one_hot / NUM_ROTATIONS)
+    s2l_loss = torch.sum(s2l_prop * y_one_hot / NUM_ROTATIONS)
     return rot_loss, s2l_loss
 
 
-def Extractor_training_function(Ex, ema, state_dict, config):
+def Extractor_training_function(Ex, ema, Ex_parallel, state_dict, config):
     def train(x, y):
         Ex.optim.zero_grad()
-        rot_logits, s2l_logits, y, ry = Ex(x, y)
-        rot_loss, s2l_loss = extractor_loss(rot_logits, s2l_logits, y, ry, config['n_classes'])
+        rot_logits, s2l_logits, y, ry = Ex_parallel(x, y)
+        rot_loss, s2l_loss = extractor_loss(rot_logits, s2l_logits, y, ry)
         loss = rot_loss + 0.5 * s2l_loss
         loss.backward()
-        # if config['G_ortho'] > 0.0:
-        #     print('using modified ortho reg in G')  # Debug print to indicate we're using ortho reg in G
-        #     # Don't ortho reg shared, it makes no sense. Really we should blacklist any embeddings for this
-        #     utils.ortho(Ex, config['G_ortho'])
-        # Ex.optim.step()
+        if config['Ex_ortho'] > 0.0:
+            print('using modified ortho reg in Extractor')  # Debug print to indicate we're using ortho reg in G
+            # Don't ortho reg shared, it makes no sense. Really we should blacklist any embeddings for this
+            utils.ortho(Ex, config['G_ortho'])
+        Ex.optim.step()
 
         # If we have an ema, update it, regardless of if we test with it or not
         if config['ema']:
@@ -103,4 +106,3 @@ def Extractor_training_function(Ex, ema, state_dict, config):
         return out
 
     return train
-
