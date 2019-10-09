@@ -151,7 +151,7 @@ def run(config):
   else:
     train = train_fns.dummy_training_function()
   # Prepare Sample function for use with inception metrics
-  sample = functools.partial(utils.sample,
+  sample = functools.partial(vae_utils.sample_for_SL,
                              G=(G_ema if config['ema'] and config['use_ema']
                                  else G),
                              z_=z_, y_=y_, config=config)
@@ -177,8 +177,8 @@ def run(config):
         x, y = x.to(device).half(), y.to(device)
       else:
         x, y = x.to(device), y.to(device)
-      y = torch.ones_like(y).to(device)
-      metrics = train(x, y)
+      yy = torch.ones_like(y).to(device)
+      metrics = train(x, yy)
       train_log.log(itr=int(state_dict['itr']), **metrics)
       
       # Every sv_log_interval, log singular values
