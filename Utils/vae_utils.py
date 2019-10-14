@@ -415,3 +415,14 @@ def general_one_hot(y, n_classes):
     y_one_hot = torch.nn.functional.one_hot(y, n_classes+1)
     y_one_hot = y_one_hot[:, 1:]
     return y_one_hot
+
+
+def sample_for_SL(G, z_, y_, config):
+  with torch.no_grad():
+    z_.sample_()
+    y_
+    if config['parallel']:
+      G_z =  nn.parallel.data_parallel(G, (z_, G.shared(y_)))
+    else:
+      G_z = G(z_, G.shared(y_))
+    return G_z, y_
