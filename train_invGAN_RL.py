@@ -122,7 +122,7 @@ def run(config):
   D_batch_size = (config['batch_size'] * config['num_D_steps']
                   * config['num_D_accumulations'])
   loaders = utils.get_data_loaders(**{**config, 'batch_size': D_batch_size,
-                                      'start_itr': state_dict['itr']})
+                                      'start_itr': state_dict['itr'], 'random_label': True})
 
   # Prepare inception metrics: FID and IS
   get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'],
@@ -134,8 +134,6 @@ def run(config):
   # Allow for different batch sizes in G
   G_batch_size = max(config['G_batch_size'], config['batch_size'])
   z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
-                             device=device, fp16=config['G_fp16'])
-  _, ry_ = utils.prepare_z_y(D_batch_size, G.dim_z, config['n_classes'],
                              device=device, fp16=config['G_fp16'])
   # Prepare a fixed z & y to see individual sample evolution throghout training
   fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
@@ -177,8 +175,7 @@ def run(config):
         x, y = x.to(device).half(), y.to(device)
       else:
         x, y = x.to(device), y.to(device)
-      ry_.sample_()
-      metrics = train(x, ry_)
+      metrics = train(x, y)
       train_log.log(itr=int(state_dict['itr']), **metrics)
       
       # Every sv_log_interval, log singular values
