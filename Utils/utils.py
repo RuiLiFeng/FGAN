@@ -54,6 +54,9 @@ def prepare_parser():
   parser.add_argument(
     '--use_multiepoch_sampler', action='store_true', default=False,
     help='Use the multi-epoch sampler for dataloader? (default: %(default)s)')
+  parser.add_argument(
+    '--load_name', type=str, default='none',
+    help='Load name to specify the loading weights file? (default: %(default)s)')
   
   
   ### Model stuff ###
@@ -779,8 +782,10 @@ def save_weights(G, D, state_dict, weights_root, experiment_name,
 
 # Load a model's weights, optimizer, and the state_dict
 def load_weights(G, D, state_dict, weights_root, experiment_name, 
-                 name_suffix=None, G_ema=None, strict=True, load_optim=True):
+                 name_suffix=None, G_ema=None, strict=True, load_optim=True, load_name='none'):
   root = '/'.join([weights_root, experiment_name])
+  if load_name != 'none':
+    root = '/'.join([weights_root, load_name])
   if name_suffix:
     print('Loading %s weights from %s...' % (name_suffix, root))
   else:
