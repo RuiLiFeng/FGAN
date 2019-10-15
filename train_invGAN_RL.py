@@ -90,6 +90,7 @@ def run(config):
   # If loading from a pre-trained model, load weights
   if config['resume']:
     print('Loading weights...')
+    print(config['load_name'])
     utils.load_weights(G, D, state_dict,
                        config['weights_root'], experiment_name,
                        config['load_weights'] if config['load_weights'] else None,
