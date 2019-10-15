@@ -784,6 +784,7 @@ def save_weights(G, D, state_dict, weights_root, experiment_name,
 def load_weights(G, D, state_dict, weights_root, experiment_name, 
                  name_suffix=None, G_ema=None, strict=True, load_optim=True, load_name='none'):
   root = '/'.join([weights_root, experiment_name])
+  print(load_name)
   if load_name != 'none':
     root = '/'.join([weights_root, load_name])
   if name_suffix:
