@@ -93,7 +93,8 @@ def run(config):
     utils.load_weights(G, D, state_dict,
                        config['weights_root'], experiment_name,
                        config['load_weights'] if config['load_weights'] else None,
-                       G_ema if config['ema'] else None)
+                       G_ema if config['ema'] else None,
+                       config['load_name'])
 
   # If parallel, parallelize the GD module
   if config['parallel']:
