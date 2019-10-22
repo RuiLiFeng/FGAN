@@ -162,7 +162,7 @@ def run(config):
             # Every sv_log_interval, log singular values
             if (config['sv_log_interval'] > 0) and (not (state_dict['itr'] % config['sv_log_interval'])):
                 train_log.log(itr=int(state_dict['itr']),
-                              **{**utils.get_SVs(G, 'G'), **utils.get_SVs(D, 'D')})
+                              **{**utils.get_SVs(G, 'G'), **utils.get_SVs(E, 'E')})
 
             # If using my progbar, print metrics.
             if config['pbar'] == 'mine':
