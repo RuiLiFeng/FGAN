@@ -53,7 +53,8 @@ def run(config):
     torch.backends.cudnn.benchmark = True
 
     # Import the model--this line allows us to dynamically select different files.
-    experiment_name = 'Train_vgg_alter_encoder'
+    experiment_name = (config['experiment_name'] if config['experiment_name']
+                       else utils.name_from_config(config))
     print('Experiment name is %s' % experiment_name)
 
     # Next, build the model
