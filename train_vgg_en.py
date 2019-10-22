@@ -133,6 +133,8 @@ def run(config):
         E.optim.zero_grad()
         z_.sample_()
         y_.sample_()
+        print(z_.shape, y_.shape)
+
         net = GE(z_[:config['batch_size']], y_[:config['batch_size']])
         loss = F.relu(1.0 - F.l1_loss(z_[:config['batch_size']], net))
         loss.backward()
