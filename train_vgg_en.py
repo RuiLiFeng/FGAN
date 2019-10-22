@@ -135,7 +135,7 @@ def run(config):
         y_.sample_()
 
         net = GE(z_[:config['batch_size']], y_[:config['batch_size']])
-        loss = F.relu(1.0 - F.l1_loss(z_[:config['batch_size']], net))
+        loss = F.l1_loss(z_[:config['batch_size']], net)
         loss.backward()
         if config["E_ortho"] > 0.0:
             print('using modified ortho reg in E')
