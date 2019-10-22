@@ -162,6 +162,9 @@ def prepare_parser():
     '--skip_init', action='store_true', default=False,
     help='Skip initialization, ideal for testing when ortho init was used '
           '(default: %(default)s)')
+  parser.add_argument(
+    '--pretrained_G_dir', type=str, default='/gdata/fengrl/fgan',
+    help='Dir of the pretrained G (default: %(default)s)')
   
   ### Optimizer stuff ###
   parser.add_argument(
