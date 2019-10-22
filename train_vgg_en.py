@@ -66,7 +66,7 @@ def run(config):
     G_dict.update(pretrained_dict)
     G.load_state_dict(G_dict)
 
-    E = Encoder(**config)
+    E = Encoder(**config).to(device)
     utils.toggle_grad(G, False)
     utils.toggle_grad(E, True)
 
@@ -95,7 +95,7 @@ def run(config):
 
     print(G)
     print(E)
-    print('Number of params in G: {} D: {}'.format(
+    print('Number of params in G: {} E: {}'.format(
         *[sum([p.data.nelement() for p in net.parameters()]) for net in [G, E]]))
     # Prepare state dict, which holds things like epoch # and itr #
     state_dict = {'itr': 0, 'epoch': 0, 'save_num': 0, 'save_best_num': 0,
