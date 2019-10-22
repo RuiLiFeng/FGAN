@@ -78,7 +78,7 @@ def run(config):
 
         def forward(self, w, y):
             with torch.no_grad():
-                net = self.G(w, y)
+                net = self.G(w, self.G.shared(y))
             net = self.E(net)
             return net
 
@@ -133,7 +133,6 @@ def run(config):
         E.optim.zero_grad()
         z_.sample_()
         y_.sample_()
-        print(z_.shape, y_.shape)
 
         net = GE(z_[:config['batch_size']], y_[:config['batch_size']])
         loss = F.relu(1.0 - F.l1_loss(z_[:config['batch_size']], net))
