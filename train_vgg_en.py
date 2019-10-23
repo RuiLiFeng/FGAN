@@ -58,7 +58,7 @@ def run(config):
     print('Experiment name is %s' % experiment_name)
 
     # Next, build the model
-    G = Generator(**config).to(device)
+    G = Generator(**{**config, 'skip_init': True, 'no_optim': True}).to(device)
     print('Loading pretrained G for dir %s ...' % config['pretrained_G_dir'])
     pretrained_dict = torch.load(config['pretrained_G_dir'])
     G_dict = G.state_dict()
@@ -174,7 +174,7 @@ def run(config):
             if not (state_dict['itr'] % config['save_every']):
                 vae_utils.save_weights([E], state_dict, config['weights_root'],
                                        experiment_name, 'copy%d' % state_dict['save_num'],
-                                       E_ema if config['ema'] else None)
+                                       [E_ema if config['ema'] else None])
                 state_dict['save_num'] = (state_dict['save_num'] + 1) % config['num_save_copies']
         # Increment epoch counter at end of epoch
         state_dict['epoch'] += 1
