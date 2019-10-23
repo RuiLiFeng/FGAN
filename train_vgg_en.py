@@ -19,7 +19,6 @@ from Metric import inception_utils
 from Utils import utils, vae_utils
 from Training import train_fns
 from sync_batchnorm import patch_replication_callback
-from importlib import import_module
 from Network.VaeGAN.Encoder import Encoder
 from Network.BigGAN.BigGAN import Generator
 
@@ -52,7 +51,6 @@ def run(config):
     # Setup cudnn.benchmark for free speed
     torch.backends.cudnn.benchmark = True
 
-    # Import the model--this line allows us to dynamically select different files.
     experiment_name = (config['experiment_name'] if config['experiment_name']
                        else utils.name_from_config(config))
     print('Experiment name is %s' % experiment_name)
