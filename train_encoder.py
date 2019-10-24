@@ -22,16 +22,54 @@ from sync_batchnorm import patch_replication_callback
 from Network.BigGAN import BigGAN
 from Network.VaeGAN.Encoder import Encoder
 from Network.VaeGAN import losses
+import os, torchvision
 
 
 # The main training file. Config is a dictionary specifying the configuration
 # of this training run.
+
+"""
+The utils for training encoder.
+"""
+
+
 def load_pretrained(net, path):
     pretrained_dict = torch.load(path)
     net_dict = net.state_dict()
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in net_dict}
     net_dict.update(pretrained_dict)
     net.load_state_dict(net_dict)
+
+
+def save_and_sample(G, E, E_ema, fixed_x, fixed_y, state_dict, config, experiment_name):
+    vae_utils.save_weights([E], state_dict, config['weights_root'],
+                           experiment_name, None, [E_ema if config['ema'] else None])
+    if config['num_save_copies'] > 0:
+        vae_utils.save_weights([E], state_dict, config['weights_root'],
+                               experiment_name,
+                               'copy%d' % state_dict['save_num'],
+                               [E_ema if config['ema'] else None])
+        state_dict['save_num'] = (state_dict['save_num'] + 1) % config['num_save_copies']
+        G_batch_size = max(config['G_batch_size'], config['batch_size'])
+        z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
+                          device='cuda', fp16=config['G_fp16'])
+        utils.accumulate_standing_stats(G, z_, y_, config['n_classes'], config['num_standing_accumulations'])
+        del z_, y_
+        which_E = E_ema if config['ema'] and config['use_ema'] else E
+        with torch.no_grad():
+            if config['parallel']:
+                fixed_w = nn.parallel.data_parallel(which_E, fixed_x)
+                fixed_Gz = nn.parallel.data_parallel(G, (fixed_w, G.shared(fixed_y)))
+            else:
+                fixed_w = which_E(fixed_x)
+                fixed_Gz = G(fixed_w, G.shared(fixed_y))
+        if not os.path.isdir('%s/%s' % (config['samples_root'], experiment_name)):
+            os.mkdir('%s/%s' % (config['samples_root'], experiment_name))
+        image_filename = '%s/%s/fixed_samples%d.jpg' % (config['samples_root'],
+                                                        experiment_name,
+                                                        state_dict['itr'])
+        torchvision.utils.save_image(fixed_Gz.float().cpu(), image_filename,
+                                     nrow=int(fixed_Gz.shape[0] ** 0.5), normalize=True)
 
 
 def run(config):
@@ -147,7 +185,7 @@ def run(config):
     loaders = utils.get_data_loaders(**{**config, 'batch_size': D_batch_size,
                                         'start_itr': state_dict['itr']})
     G_batch_size = max(config['G_batch_size'], config['batch_size'])
-    fixed_x = vae_utils.prepare_fixed_x(loaders[0], G_batch_size, config, experiment_name, device)
+    fixed_x, fixed_y = vae_utils.prepare_fixed_x(loaders[0], G_batch_size, config, experiment_name, device)
 
     # Prepare inception metrics: FID and IS
     get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'],
@@ -212,7 +250,7 @@ def run(config):
             # Every sv_log_interval, log singular values
             if (config['sv_log_interval'] > 0) and (not (state_dict['itr'] % config['sv_log_interval'])):
                 train_log.log(itr=int(state_dict['itr']),
-                              **{**utils.get_SVs(G, 'G'), **utils.get_SVs(D, 'D')})
+                              **{**utils.get_SVs(E, 'E')})
 
             # If using my progbar, print metrics.
             if config['pbar'] == 'mine':
@@ -228,16 +266,8 @@ def run(config):
                     E.eval()
                     if config['ema']:
                         E_ema.eval()
-                train_fns.save_and_sample(G, D, G_ema, z_, y_, fixed_z, fixed_y,
-                                          state_dict, config, experiment_name)
-
-            # Test every specified interval
-            if not (state_dict['itr'] % config['test_every']):
-                if config['G_eval_mode']:
-                    print('Switchin G to eval mode...')
-                    G.eval()
-                train_fns.test(G, D, G_ema, z_, y_, state_dict, config, sample,
-                               get_inception_metrics, experiment_name, test_log)
+                save_and_sample(G, E, E_ema, fixed_x, fixed_y,
+                                state_dict, config, experiment_name)
         # Increment epoch counter at end of epoch
         state_dict['epoch'] += 1
 

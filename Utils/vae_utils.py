@@ -318,16 +318,19 @@ def accumulate_standing_stats(net_list, z, y, nclasses, num_accumulations=16):
 def prepare_fixed_x(dataloader, G_batch_size, config, experiment_name, device='cuda'):
     x, y = dataloader.__iter__().__next__()
     x = x.to(device)
+    y = y.to(device)
     x = torch.split(x, G_batch_size)[0]
+    y = torch.split(y, G_batch_size)[0]
     if config['G_fp16']:
         x = x.half()
+        y = y.half()
     if not os.path.isdir('%s/%s' % (config['samples_root'], experiment_name)):
         os.mkdir('%s/%s' % (config['samples_root'], experiment_name))
     image_filename = '%s/%s/fixed_x.jpg' % (config['samples_root'],
                                             experiment_name)
     torchvision.utils.save_image(x.float().cpu(), image_filename,
                                  nrow=int(x.shape[0] ** 0.5), normalize=True)
-    return x
+    return x, y
 
 
 def sample_sheet(G, I, classes_per_sheet, num_classes, samples_per_class, parallel,

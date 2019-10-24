@@ -165,6 +165,12 @@ def prepare_parser():
   parser.add_argument(
     '--pretrained_G_dir', type=str, default='/gdata/fengrl/fgan',
     help='Dir of the pretrained G (default: %(default)s)')
+  parser.add_argument(
+    '--pretrained_D_dir', type=str, default='/gdata/fengrl/fgan',
+    help='Dir of the pretrained G (default: %(default)s)')
+  parser.add_argument(
+    '--pretrained_vgg_alter_dir', type=str, default='/gdata/fengrl/fgan',
+    help='Dir of the pretrained G (default: %(default)s)')
   
   ### Optimizer stuff ###
   parser.add_argument(

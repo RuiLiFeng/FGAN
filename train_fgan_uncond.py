@@ -160,7 +160,7 @@ def run(config):
     fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
                                          config['n_classes'], device=device,
                                          fp16=config['G_fp16'])
-    fixed_x = vae_utils.prepare_fixed_x(loaders[0], G_batch_size, config, experiment_name, device)
+    fixed_x, _ = vae_utils.prepare_fixed_x(loaders[0], G_batch_size, config, experiment_name, device)
     fixed_z.sample_()
     fixed_y.sample_()
     # Loaders are loaded, prepare the training function
