@@ -206,7 +206,7 @@ def run(config):
             fake, logits, vgg_loss = Wrapper(img[counter], label[counter])
             vgg_loss = vgg_loss * config['vgg_loss_scale']
             d_loss = losses.generator_loss(logits) * config['adv_loss_scale']
-            recon_loss = losses.recon_loss(fakes=fake, reals=img)
+            recon_loss = losses.recon_loss(fakes=fake, reals=img) * config['recon_loss_scale']
             loss = d_loss + recon_loss + vgg_loss
             loss.backward()
             counter += 1

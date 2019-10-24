@@ -129,7 +129,10 @@ def prepare_parser():
 
   ### I,E,L model stuff
   parser.add_argument(
-    '--recon_loss_scale', type=float, default=0.0001,
+    '--recon_loss_scale', type=float, default=1.0,
+    help='Weight of recon_loss in total loss of G? (default: %(default)s)')
+  parser.add_argument(
+    '--vgg_loss_scale', type=float, default=0.0001,
     help='Weight of recon_loss in total loss of G? (default: %(default)s)')
   parser.add_argument(
     '--adv_loss_scale', type=float, default=0.1,
