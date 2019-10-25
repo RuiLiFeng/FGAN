@@ -187,12 +187,6 @@ def run(config):
     G_batch_size = max(config['G_batch_size'], config['batch_size'])
     fixed_x, fixed_y = vae_utils.prepare_fixed_x(loaders[0], G_batch_size, config, experiment_name, device)
 
-    # Prepare inception metrics: FID and IS
-    get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'],
-                                                                      config['parallel'],
-                                                                      config['data_root'],
-                                                                      config['no_fid'])
-
     # Prepare noise and randomly sampled label arrays
 
     def train(img, label):
@@ -206,7 +200,7 @@ def run(config):
             fake, logits, vgg_loss = Wrapper(img[counter], label[counter])
             vgg_loss = vgg_loss * config['vgg_loss_scale']
             d_loss = losses.generator_loss(logits) * config['adv_loss_scale']
-            recon_loss = losses.recon_loss(fakes=fake, reals=img) * config['recon_loss_scale']
+            recon_loss = losses.recon_loss(fakes=fake, reals=img[counter]) * config['recon_loss_scale']
             loss = d_loss + recon_loss + vgg_loss
             loss.backward()
             counter += 1
