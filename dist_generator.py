@@ -172,7 +172,7 @@ def run(config):
       z = torch.matmul(z, self.embed)
       return z
 
-  embedding = Embed()
+  embedding = Embed().to(device)
   fixed_w = torch.matmul(fixed_w, embedding.embed)
 
   sample = functools.partial(sample_with_embed,
