@@ -17,6 +17,7 @@ from Network.BigGAN import losses
 from Dataset import datasets as dset, animal_hash
 from Dataset import mini_datasets as mdset
 from tqdm import tqdm
+import h5py as h5
 
 
 def SL_training_function(G, D, GD, z_, y_, ema, state_dict, config):
@@ -246,12 +247,14 @@ class KNN(object):
 
 
 def make_anchor(dataset, anchor_num):
+    with h5.File(dataset.root, 'r') as f:
+        dlabel = f['labels']
     anchor_list = []
     counter = 0
     label_record = 0
     print("Generating KNN anchor with %i anchors per class." % anchor_num)
-    for index in tqdm(range(len(dataset))):
-        _, label = dataset[index]
+    for index in tqdm(range(len(dlabel))):
+        label = dlabel[index]
         if counter < anchor_num:
             anchor_list.append(index)
             counter += 1
@@ -259,7 +262,7 @@ def make_anchor(dataset, anchor_num):
             label_record = label
             anchor_list.append(index)
             counter = 1
-    return dataset['imgs'][anchor_list], dataset['labels'][anchor_list], anchor_list
+    return dataset[anchor_list], anchor_list
 
 
 def make_index_per_class(dataset, anchor_num):
@@ -268,7 +271,7 @@ def make_index_per_class(dataset, anchor_num):
     counter = 0
     label_record = 0
     print("Generating Few shot anchor with %d anchors per class." % anchor_num)
-    for index in range(len(dataset)):
+    for index in tqdm(range(len(dataset))):
         label = dataset[index]
         if counter < anchor_num:
             anchor_list.append(index)
