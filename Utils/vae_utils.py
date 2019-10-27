@@ -504,6 +504,7 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
             y = y.to(device)
             loss += model(x, y) / x.shape[0]
         del x, y
+    dense_eval.init_weight()
     return loss
 
 
