@@ -108,12 +108,13 @@ def save_and_eavl(E, Out, E_ema, O_ema, state_dict, config, experiment_name, eva
         which_E = E_ema if config['ema'] and config['use_ema'] else E
         precise = eval_fn(which_E)
         if precise > state_dict['best_precise']:
-            state_dict['best_precise'] = max(state_dict['best_precise'], precise)
             print('KNN precise improved over previous best, saving checkpoint...')
             vae_utils.save_weights([E], state_dict, config['weights_root'],
                                    experiment_name, 'best%d' % state_dict['save_best_num'],
                                    [E_ema if config['ema'] else None])
             state_dict['save_best_num'] = (state_dict['save_best_num'] + 1) % config['num_best_copies']
-            test_log.log(itr=int(state_dict['itr']), precise=float(precise))
+        state_dict['best_precise'] = max(state_dict['best_precise'], precise)
+
+        test_log.log(itr=int(state_dict['itr']), precise=float(precise))
 
 
