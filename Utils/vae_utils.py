@@ -235,7 +235,7 @@ class KNN(object):
         precision = 0.0
         with torch.no_grad():
             anchor_v = encoder(self.anchor).split(1, 0)
-            for i, (x, y) in enumerate(self.dataloader):
+            for i, (x, y) in tqdm(enumerate(self.dataloader)):
                 if i > self.sample_batch:
                     break
                 v = encoder(x)
