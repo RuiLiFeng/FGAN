@@ -219,6 +219,7 @@ class KNN(object):
         self.sample_batch = sample_batch
         dataset = dataloader.dataset
         if load_anchor_dir is not None:
+            print('Loading KNN parameters from %s ...' % load_anchor_dir)
             file = np.load(load_anchor_dir).item()
             self.anchor, self.anchor_label, self.index = file['anchor'], file['anchor_label'], file['index']
             self.anchor = torch.tensor(self.anchor)
@@ -235,6 +236,7 @@ class KNN(object):
         with torch.no_grad():
             anchor_v = encoder(self.anchor).split(1, 0)
             for i, (x, y) in tqdm(enumerate(self.dataloader)):
+                x, y = x.to(self.device), y.to(self.device)
                 if i > self.sample_batch:
                     break
                 v = encoder(x)
