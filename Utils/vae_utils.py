@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
@@ -442,3 +443,66 @@ def sample_for_SL(G, z_, y_, config):
     else:
       G_z = G(z_, G.shared(y_))
     return G_z, y_
+
+
+class dense_eval(nn.Module):
+    def __init__(self, in_feature, n_classes=1000, steps=5):
+        super(dense_eval, self).__init__()
+        self.steps = steps
+        self.dense = nn.Linear(in_feature, n_classes)
+        self.softmax = nn.Sigmoid(dim=1)
+        self.init_weight()
+
+    def init_weight(self):
+        torch.nn.init.zeros_(self.dense.weight)
+
+    def forward(self, x):
+        x = self.dense(x)
+        x = self.softmax(x)
+        return x
+
+
+def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10):
+    loss_fn = nn.CrossEntropyLoss(reduction='mean')
+    optim = torch.optim.Adam(params=dense_eval.parameters(), lr=0.001)
+
+    def model(x, y):
+        if config['parallel']:
+            with torch.no_grad():
+                x = nn.parallel.data_parallel(Encoder, x)
+            x = nn.parallel.data_parallel(dense_eval, x)
+            loss = torch.nn.parallel.data_parallel(loss_fn, (x, y))
+        else:
+            with torch.no_grad():
+                x = Encoder(x)
+            x = dense_eval(x)
+            loss = loss_fn(x)
+        return loss
+
+    def train(x, y):
+        optim.zero_grad()
+        loss = model(x, y)
+        loss.backward()
+        optim.step()
+        return loss
+
+    for i, (x, y) in enumerate(loader):
+        if i > dense_eval.steps:
+            break
+        train(x, y)
+        del x, y
+    del optim, loss_fn
+
+    loss = 0.0
+    for i, (x, y) in enumerate(loader):
+        if i > sample_batch:
+            break
+        with torch.no_grad():
+            loss += model(x, y) / x.shape[0]
+        del x, y
+    return loss
+
+
+
+
+

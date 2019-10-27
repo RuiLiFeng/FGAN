@@ -91,16 +91,16 @@ def get_SSGAN_sample_loader(ssgan_sample_root, start, end, batch_size=64, shuffl
     return loader
 
 
-def save_and_eavl(E, E_ema, state_dict, config, experiment_name, KNN=None, test_log=None):
+def save_and_eavl(E, Out, E_ema, O_ema, state_dict, config, experiment_name, eval_fn=None, test_log=None):
     if config['num_save_copies'] > 0:
-        vae_utils.save_weights([E], state_dict, config['weights_root'],
+        vae_utils.save_weights([E, Out], state_dict, config['weights_root'],
                                experiment_name,
                                'copy%d' % state_dict['save_num'],
-                               [E_ema if config['ema'] else None])
+                               [E_ema, O_ema] if config['ema'] else [None])
         state_dict['save_num'] = (state_dict['save_num'] + 1) % config['num_save_copies']
-    if KNN is not None:
+    if eval_fn is not None:
         which_E = E_ema if config['ema'] and config['use_ema'] else E
-        precise = KNN(which_E)
+        precise = eval_fn(which_E)
         if precise > state_dict['best_precise']:
             state_dict['best_precise'] = max(state_dict['best_precise'], precise)
             print('KNN precise improved over previous best, saving checkpoint...')

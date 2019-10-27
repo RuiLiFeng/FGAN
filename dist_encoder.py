@@ -57,40 +57,56 @@ def run(config):
   print('Experiment name is %s' % experiment_name)
 
   # Next, build the model
-  E = Encoder(**{**config, 'no_optim': True}).to(device)
+  E = Encoder(**{**config, 'arch': 'default'}).to(device)
+  Out = Encoder(**{**config, 'arch': 'out'}).to(device)
 
   # If using EMA, prepare it
   if config['ema']:
     print('Preparing EMA for G with decay of {}'.format(config['ema_decay']))
     E_ema = Encoder(**{**config, 'skip_init':True,
-                       'no_optim': True}).to(device)
-    ema = utils.ema(E, E_ema, config['ema_decay'], config['ema_start'])
+                       'no_optim': True, 'arch': 'default'}).to(device)
+    O_ema = Encoder(**{**config, 'skip_init':True,
+                       'no_optim': True, 'arch': 'out'}).to(device)
+    eema = utils.ema(E, E_ema, config['ema_decay'], config['ema_start'])
+    oema = utils.ema(Out, O_ema, config['ema_decay'], config['ema_start'])
   else:
-    E_ema, ema = None, None
+    E_ema, ema, O_ema, oema = None, None, None, None
 
   print(E)
+  print(Out)
   print('Number of params in E: {}'.format(
-    *[sum([p.data.nelement() for p in net.parameters()]) for net in [E]]))
+    *[sum([p.data.nelement() for p in net.parameters()]) for net in [E, Out]]))
   # Prepare state dict, which holds things like epoch # and itr #
   state_dict = {'itr': 0, 'epoch': 0, 'save_num': 0, 'save_best_num': 0,
-                'best_IS': 0, 'best_FID': 999999, 'config': config}
+                'best_IS': 0, 'best_FID': 999999, 'config': config, 'best_precision'}
 
   # If loading from a pre-trained model, load weights
   if config['resume']:
     print('Loading weights...')
-    vae_utils.load_weights([E], state_dict,
+    vae_utils.load_weights([E, Out], state_dict,
                            config['weights_root'], experiment_name,
                            config['load_weights'] if config['load_weights'] else None,
-                           [E_ema if config['ema'] else None])
+                           [E_ema, O_ema] if config['ema'] else [None])
+
+  class Wrapper(nn.Module):
+    def __init__(self):
+      super(Wrapper, self).__init__()
+      self.E = E
+      self.O = Out
+
+    def forward(self, x):
+      x = self.E(x)
+      x = self.O(x)
+      return x
+
+  W = Wrapper()
 
   # If parallel, parallelize the GD module
   if config['parallel']:
-    E = nn.DataParallel(E)
-    save_and_eval_E = E.module
+    W = nn.DataParallel(W)
     if config['cross_replica']:
-      patch_replication_callback(E)
-  else:
-    save_and_eval_E = E
+      patch_replication_callback(W)
+
 
   # Prepare loggers for stats; metrics holds test metrics,
   # lmetrics holds any desired training metrics.
@@ -100,7 +116,6 @@ def run(config):
   print('Inception Metrics will be saved to {}'.format(test_metrics_fname))
   test_log = utils.MetricsLogger(test_metrics_fname,
                                  reinitialize=(not config['resume']))
-  KNN = None
   print('Training Metrics will be saved to {}'.format(train_metrics_fname))
   train_log = utils.MyLogger(train_metrics_fname,
                              reinitialize=(not config['resume']),
@@ -108,19 +123,26 @@ def run(config):
   # Write metadata
   utils.write_metadata(config['logs_root'], experiment_name, config, state_dict)
 
-  E_optim = torch.optim.Adam(params=E.parameters(), lr=config['E_lr'],
-                             betas=(config['E_B1'], config['E_B2']), weight_decay=0, eps=config['adam_eps'])
+  eval_loader = utils.get_data_loaders(**{**config,'load_in_memory': False})
+  dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=10)
+  eval_fn = functools.partial(vae_utils.eval_encoder, sample_batch=10,
+                              config=config, loader=eval_loader,
+                              dense_eval=dense_eval)
+
 
   def train(w, img):
-    E_optim.zero_grad()
-    w_ = E(img)
+    E.optim.zero_grad()
+    Out.optim.zero_grad()
+    w_ = W(img)
     loss = F.mse_loss(w_, w, reduction='sum')
     loss.backward()
     if config['E_ortho'] > 0.0:
       # Debug print to indicate we're using ortho reg in D.
       print('using modified ortho reg in E')
-      utils.ortho(save_and_eval_E, config['E_ortho'])
-    E_optim.step()
+      utils.ortho(E, config['E_ortho'])
+      utils.ortho(Out, config['E_ortho'])
+    E.optim.step()
+    Out.optim.step()
     out = {'loss': loss}
     return out
 
@@ -143,8 +165,10 @@ def run(config):
         # Make sure G and D are in training mode, just in case they got set to eval
         # For D, which typically doesn't have BN, this shouldn't matter much.
         E.train()
+        Out.train()
         if config['ema']:
           E_ema.train()
+          O_ema.train()
         img, w = img.to(device), w.to(device)
         metrics = train(img, w)
         train_log.log(itr=int(state_dict['itr']), **metrics)
@@ -152,7 +176,7 @@ def run(config):
         # Every sv_log_interval, log singular values
         if (config['sv_log_interval'] > 0) and (not (state_dict['itr'] % config['sv_log_interval'])):
           train_log.log(itr=int(state_dict['itr']),
-                        **{**utils.get_SVs(save_and_eval_E, 'E')})
+                        **{**utils.get_SVs(E, 'E'), **utils.get_SVs(Out, 'Out')})
 
         # If using my progbar, print metrics.
         if config['pbar'] == 'mine':
@@ -164,10 +188,10 @@ def run(config):
         if not (state_dict['itr'] % config['save_every']):
           if config['G_eval_mode']:
             print('Switchin e to eval mode...')
-            save_and_eval_E.eval()
+            E.eval()
             if config['ema']:
               E_ema.eval()
-          sampled_ssgan.save_and_eavl(save_and_eval_E, E_ema, state_dict, config, experiment_name, KNN, test_log)
+          sampled_ssgan.save_and_eavl(E, Out, E_ema, O_ema, state_dict, config, experiment_name, eval_fn, test_log)
       del loader, pbar
     #  Increment epoch counter at end of epoch
     state_dict['epoch'] += 1
