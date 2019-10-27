@@ -211,37 +211,43 @@ class KNN(object):
                  K=5,
                  sample_batch=10,
                  anchor_num=10,
-                 device='cuda'):
+                 device='cuda',
+                 load_anchor_dir='/ghome/fengrl/home/FGAN/KNN_anchor.npy'):
         self.K = K
         assert K <= anchor_num
         self.device = device
         self.sample_batch = sample_batch
         dataset = dataloader.dataset
-        self.anchor, self.anchor_label, self.index = make_anchor(dataset, anchor_num)
-        self.anchor.to(self.device)
+        if load_anchor_dir is not None:
+            file = np.load(load_anchor_dir).item()
+            self.anchor, self.anchor_label, self.index = file['anchor'], file['anchor_label'], file['index']
+            self.anchor = torch.tensor(self.anchor)
+        else:
+            self.anchor, self.anchor_label, self.index = make_anchor(dataset, anchor_num)
+        self.anchor
         self.dataloader = dataloader
 
     def __call__(self, encoder):
+    def res(self, encoder):
         """
         FTWS: return dict as out in train_fns.
         """
         precision = 0.0
         with torch.no_grad():
-            with torch.device('cuda'):
-                anchor_v = encoder(self.anchor).split(1, 0)
-                for i, (x, y) in enumerate(self.dataloader):
-                    if i > self.sample_batch:
-                        break
-                    v = encoder(x)
-                    dist = []
-                    for anchor in anchor_v:
-                        dist.append(torch.norm(v - anchor, 2, 1, keepdim=True))
-                    dist = torch.cat(dist, 1)    # [batch_size, anchor_num]
-                    y_arg = dist.argsort(1)
-                    for k in range(self.K):
-                        y_ = self.anchor_label[y_arg[:, k]]
-                        precision += (torch.tensor(y_) == torch.tensor(y)).sum().type_as(x) / y.shape[0]
-                    precision = float(precision / self.K)
+            anchor_v = encoder(self.anchor).split(1, 0)
+            for i, (x, y) in enumerate(self.dataloader):
+                if i > self.sample_batch:
+                    break
+                v = encoder(x)
+                dist = []
+                for anchor in anchor_v:
+                    dist.append(torch.norm(v - anchor, 2, 1, keepdim=True))
+                dist = torch.cat(dist, 1)    # [batch_size, anchor_num]
+                y_arg = dist.argsort(1)
+                for k in range(self.K):
+                    y_ = self.anchor_label[y_arg[:, k]]
+                    precision += (torch.tensor(y_) == torch.tensor(y)).sum().type_as(x) / y.shape[0]
+                precision = float(precision / self.K)
                 del x, y, v
         return precision / self.sample_batch
 
