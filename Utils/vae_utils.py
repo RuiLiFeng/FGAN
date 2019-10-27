@@ -450,7 +450,7 @@ class dense_eval(nn.Module):
         super(dense_eval, self).__init__()
         self.steps = steps
         self.dense = nn.Linear(in_feature, n_classes)
-        self.softmax = nn.Sigmoid(dim=1)
+        self.softmax = nn.Sigmoid()
         self.init_weight()
 
     def init_weight(self):
