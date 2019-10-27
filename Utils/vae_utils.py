@@ -248,7 +248,7 @@ class KNN(object):
 
 def make_anchor(dataset, anchor_num):
     with h5.File(dataset.root, 'r') as f:
-        dlabel = f['labels']
+        dlabel = f['labels'][:]
     anchor_list = []
     counter = 0
     label_record = 0
