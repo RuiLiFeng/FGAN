@@ -228,7 +228,6 @@ class KNN(object):
         self.dataloader = dataloader
 
     def __call__(self, encoder):
-    def res(self, encoder):
         """
         FTWS: return dict as out in train_fns.
         """
