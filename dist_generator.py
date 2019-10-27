@@ -143,6 +143,7 @@ def run(config):
                                        fp16=config['G_fp16'])
   fixed_w.sample_()
   fixed_y.sample_()
+  G_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(G.optim, mode='min')
 
   def train(w, img):
     y_.sample_()
@@ -154,6 +155,7 @@ def run(config):
       print('using modified ortho reg in E')
       utils.ortho(G, config['G_ortho'])
     G.optim.step()
+    G_scheduler.step(loss)
     out = {'loss': float(loss.item())}
     if config['ema']:
       ema.update(state_dict['itr'])

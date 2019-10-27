@@ -129,6 +129,8 @@ def run(config):
                               config=config, loader=eval_loader,
                               dense_eval=dense_eval, device=device)
 
+  E_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(E.optim, mode='min')
+  O_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(Out.optim, mode='min')
 
   def train(w, img):
     E.optim.zero_grad()
@@ -143,6 +145,8 @@ def run(config):
       utils.ortho(Out, config['E_ortho'])
     E.optim.step()
     Out.optim.step()
+    E_scheduler.step(loss)
+    O_scheduler.step(loss)
     out = {'loss': float(loss.item())}
     if config['ema']:
       for ema in [eema, oema]:
@@ -191,7 +195,7 @@ def run(config):
         # Save weights and copies as configured at specified interval
         if not (state_dict['itr'] % config['save_every']):
           if config['G_eval_mode']:
-            print('Switchin e to eval mode...')
+            print('Switchin E to eval mode...')
             E.eval()
             if config['ema']:
               E_ema.eval()
