@@ -224,7 +224,7 @@ class KNN(object):
             self.anchor = torch.tensor(self.anchor)
         else:
             self.anchor, self.anchor_label, self.index = make_anchor(dataset, anchor_num)
-        self.anchor
+        self.anchor = self.anchor.to(device)
         self.dataloader = dataloader
 
     def __call__(self, encoder):
