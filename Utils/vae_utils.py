@@ -262,7 +262,8 @@ def make_anchor(dataset, anchor_num):
             label_record = label
             anchor_list.append(index)
             counter = 1
-    return dataset[anchor_list], anchor_list
+    del dlabel
+    return dataset[anchor_list] + (anchor_list,)
 
 
 def make_index_per_class(dataset, anchor_num):
