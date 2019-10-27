@@ -163,7 +163,7 @@ def run(config):
   class Embed(nn.Module):
     def __init__(self):
       super(Embed, self).__init__()
-      embed = np.load('/ghome/fengrl/home/FGAN/embed.npy')
+      embed = np.load('/ghome/fengrl/home/FGAN/embed_ema.npy')
       self.embed = torch.tensor(embed, requires_grad=False)
 
     def forward(self, z):
