@@ -54,7 +54,7 @@ def run(config):
   if config['resume']:
     print('Skipping initialization for training resumption...')
     config['skip_init'] = True
-  config = utils.update_config_roots(config)
+  config = vae_utils.update_config_roots(config)
   device = 'cuda'
 
   # Seed RNG
