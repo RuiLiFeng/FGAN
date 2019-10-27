@@ -129,8 +129,8 @@ def run(config):
                               config=config, loader=eval_loader,
                               dense_eval=dense_eval, device=device)
 
-  E_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(E.optim, mode='min')
-  O_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(Out.optim, mode='min')
+  E_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(E.optim, mode='min', factor=0.5)
+  O_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(Out.optim, mode='min', factor=0.5)
 
   def train(w, img):
     E.optim.zero_grad()

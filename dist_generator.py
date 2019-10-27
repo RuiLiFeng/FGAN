@@ -143,7 +143,7 @@ def run(config):
                                        fp16=config['G_fp16'])
   fixed_w.sample_()
   fixed_y.sample_()
-  G_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(G.optim, mode='min')
+  G_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(G.optim, mode='min', factor=0.5)
 
   def train(w, img):
     y_.sample_()
