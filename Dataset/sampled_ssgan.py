@@ -74,7 +74,7 @@ class SSGAN_HDF5(data.Dataset):
 def make_dset_range(root, piece=6):
     with h5.File(root, 'r') as f:
         num_samples = len(f['z'])
-    per_set_num = num_samples / piece
+    per_set_num = num_samples // piece
     start = []
     end = []
     for i in range(piece):
