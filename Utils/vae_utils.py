@@ -485,6 +485,7 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
         optim.step()
         return loss
 
+    print('Starting eval encoder...')
     for i, (x, y) in enumerate(loader):
         if i > dense_eval.steps:
             break
@@ -492,7 +493,7 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
         y = y.to(device)
         train(x, y)
         del x, y
-    del optim, loss_fn
+    del optim
 
     loss = 0.0
     for i, (x, y) in enumerate(loader):
@@ -503,6 +504,7 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
             y = y.to(device)
             loss += model(x, y) / x.shape[0]
         del x, y
+    del loss_fn
     dense_eval.init_weight()
     return loss
 
