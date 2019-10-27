@@ -19,6 +19,7 @@ from Dataset import datasets as dset, animal_hash
 from Dataset import mini_datasets as mdset
 from tqdm import tqdm
 import h5py as h5
+from tqdm import tqdm
 
 
 def SL_training_function(G, D, GD, z_, y_, ema, state_dict, config):
@@ -485,8 +486,8 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
         optim.step()
         return loss
 
-    print('Starting eval encoder...')
-    for i, (x, y) in enumerate(loader):
+    print('Starting init eval encoder...')
+    for i, (x, y) in enumerate(tqdm(loader)):
         if i > dense_eval.steps:
             break
         x = x.to(device)
@@ -495,8 +496,9 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
         del x, y
     del optim
 
+    print('Starting eval encoder...')
     loss = 0.0
-    for i, (x, y) in enumerate(loader):
+    for i, (x, y) in enumerate(tqdm(loader)):
         if i > sample_batch:
             break
         with torch.no_grad():
