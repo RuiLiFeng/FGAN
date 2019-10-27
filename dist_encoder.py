@@ -70,7 +70,7 @@ def run(config):
     eema = utils.ema(E, E_ema, config['ema_decay'], config['ema_start'])
     oema = utils.ema(Out, O_ema, config['ema_decay'], config['ema_start'])
   else:
-    E_ema, ema, O_ema, oema = None, None, None, None
+    E_ema, eema, O_ema, oema = None, None, None, None
 
   print(E)
   print(Out)
@@ -143,7 +143,11 @@ def run(config):
       utils.ortho(Out, config['E_ortho'])
     E.optim.step()
     Out.optim.step()
-    out = {'loss': loss}
+    out = {'loss': float(loss.item())}
+    if config['ema']:
+      for ema in [eema, oema]:
+        ema.update(state_dict['itr'])
+    del w, img, w_, loss
     return out
 
   start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'])
