@@ -102,11 +102,9 @@ def run(config):
     def __init__(self):
       super(Wrapper, self).__init__()
       self.G = G
-      self.MSE = torch.nn.MSELoss(reduction='mean')
 
-    def forward(self, w, y, img):
+    def forward(self, w, y):
       x = self.G(w, self.G.shared(y))
-      x = self.MSE(x, img)
       return x
 
   W = Wrapper()
@@ -144,12 +142,13 @@ def run(config):
   fixed_w.sample_()
   fixed_y.sample_()
   G_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(G.optim, mode='min', factor=0.5)
+  MSE = torch.nn.MSELoss(reduction='mean')
 
   def train(w, img):
     y_.sample_()
     G.optim.zero_grad()
-    loss = W(w, y_, img).mean()
-    print(loss)
+    x = W(w, y_, img).mean()
+    loss = MSE(x, img)
     loss.backward()
     if config['E_ortho'] > 0.0:
       # Debug print to indicate we're using ortho reg in D.
@@ -160,7 +159,7 @@ def run(config):
     out = {'loss': float(loss.item())}
     if config['ema']:
       ema.update(state_dict['itr'])
-    del w, img, loss
+    del w, img, loss, x
     return out
 
   class Embed(nn.Module):
@@ -189,7 +188,8 @@ def run(config):
     for piece in range(config['ssgan_piece']):
       print('Load %d-th piece of ssgan sample into memory...' % piece)
       loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'start_itr': state_dict['itr'],
-                                                        'start': start[piece], 'end': end[piece]})
+                                                        'start': start[piece], 'end': end[piece],
+                                                        'drop_last': True})
       # Which progressbar to use? TQDM or my own?
       if config['pbar'] == 'mine':
         pbar = utils.progress(loader, displaytype='eta')
