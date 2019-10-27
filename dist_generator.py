@@ -147,7 +147,7 @@ def run(config):
   def train(w, img):
     y_.sample_()
     G.optim.zero_grad()
-    x = W(w, y_, img).mean()
+    x = W(w, y_)
     loss = MSE(x, img)
     loss.backward()
     if config['E_ortho'] > 0.0:
