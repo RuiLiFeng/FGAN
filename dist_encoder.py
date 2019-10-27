@@ -123,7 +123,7 @@ def run(config):
   # Write metadata
   utils.write_metadata(config['logs_root'], experiment_name, config, state_dict)
 
-  eval_loader = utils.get_data_loaders(**{**config,'load_in_memory': False})
+  eval_loader = utils.get_data_loaders(**{**config, 'load_in_mem': False})
   dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=10).to(device)
   eval_fn = functools.partial(vae_utils.eval_encoder, sample_batch=10,
                               config=config, loader=eval_loader,
