@@ -123,7 +123,7 @@ def run(config):
   # Write metadata
   utils.write_metadata(config['logs_root'], experiment_name, config, state_dict)
 
-  eval_loader = utils.get_data_loaders(**{**config, 'load_in_mem': False})
+  eval_loader = utils.get_data_loaders(**{**config, 'load_in_mem': False})[0]
   dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=10).to(device)
   eval_fn = functools.partial(vae_utils.eval_encoder, sample_batch=10,
                               config=config, loader=eval_loader,
@@ -136,7 +136,7 @@ def run(config):
     E.optim.zero_grad()
     Out.optim.zero_grad()
     w_ = W(img)
-    loss = F.mse_loss(w_, w, reduction='sum')
+    loss = F.mse_loss(w_, w, reduction='mean')
     loss.backward()
     if config['E_ortho'] > 0.0:
       # Debug print to indicate we're using ortho reg in D.
