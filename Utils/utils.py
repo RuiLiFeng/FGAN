@@ -57,7 +57,13 @@ def prepare_parser():
   parser.add_argument(
     '--load_name', type=str, default='none',
     help='Load name to specify the loading weights file? (default: %(default)s)')
-  
+  parser.add_argument(
+    '--ssgan_sample_root', type=str, default='/gpub/temp/imagenet2012/hdf5/SSGAN128.hdf5',
+    help='Root to ssgan samples (default: %(default)s)')
+  parser.add_argument(
+    '--ssgan_piece', type=int, default=6,
+    help='how many pieces to cut the ssgan sample into (default: %(default)s)')
+
   
   ### Model stuff ###
   parser.add_argument(

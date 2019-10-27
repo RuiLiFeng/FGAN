@@ -106,7 +106,7 @@ def save_and_sample(G, D, G_ema, z_, y_, fixed_z, fixed_y,
                        experiment_name,
                        'copy%d' % state_dict['save_num'],
                        G_ema if config['ema'] else None)
-    state_dict['save_num'] = (state_dict['save_num'] + 1 ) % config['num_save_copies']
+    state_dict['save_num'] = (state_dict['save_num'] + 1) % config['num_save_copies']
     
   # Use EMA G for samples or non-EMA?
   which_G = G_ema if config['ema'] and config['use_ema'] else G

@@ -16,6 +16,7 @@ from Utils import utils
 from Network.BigGAN import losses
 from Dataset import datasets as dset, animal_hash
 from Dataset import mini_datasets as mdset
+from tqdm import tqdm
 
 
 def SL_training_function(G, D, GD, z_, y_, ema, state_dict, config):
@@ -225,21 +226,22 @@ class KNN(object):
         """
         precision = 0.0
         with torch.no_grad():
-            anchor_v = encoder(self.anchor).split(1, 0)
-            for i, (x, y) in enumerate(self.dataloader):
-                if i > self.sample_batch:
-                    break
-                v = encoder(x)
-                dist = []
-                for anchor in anchor_v:
-                    dist.append(torch.norm(v - anchor, 2, 1, keepdim=True))
-                dist = torch.cat(dist, 1)    # [batch_size, anchor_num]
-                y_arg = dist.argsort(1)
-                for k in range(self.K):
-                    y_ = self.anchor_label[y_arg[:, k]]
-                    precision += (torch.tensor(y_) == torch.tensor(y)).sum().type_as(x) / y.shape[0]
-                precision = float(precision / self.K)
-            del x, y, v
+            with torch.device('cuda'):
+                anchor_v = encoder(self.anchor).split(1, 0)
+                for i, (x, y) in enumerate(self.dataloader):
+                    if i > self.sample_batch:
+                        break
+                    v = encoder(x)
+                    dist = []
+                    for anchor in anchor_v:
+                        dist.append(torch.norm(v - anchor, 2, 1, keepdim=True))
+                    dist = torch.cat(dist, 1)    # [batch_size, anchor_num]
+                    y_arg = dist.argsort(1)
+                    for k in range(self.K):
+                        y_ = self.anchor_label[y_arg[:, k]]
+                        precision += (torch.tensor(y_) == torch.tensor(y)).sum().type_as(x) / y.shape[0]
+                    precision = float(precision / self.K)
+                del x, y, v
         return precision / self.sample_batch
 
 
@@ -248,7 +250,7 @@ def make_anchor(dataset, anchor_num):
     counter = 0
     label_record = 0
     print("Generating KNN anchor with %i anchors per class." % anchor_num)
-    for index in range(len(dataset)):
+    for index in tqdm(range(len(dataset))):
         _, label = dataset[index]
         if counter < anchor_num:
             anchor_list.append(index)
