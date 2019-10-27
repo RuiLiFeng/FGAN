@@ -17,10 +17,24 @@ import torch.nn.functional as F
 # Import my stuff
 from Metric import inception_utils
 from Utils import utils, vae_utils
+import numpy as np
 from sync_batchnorm import patch_replication_callback
-from Network.VaeGAN.Encoder import Encoder
 from Network.BigGAN.BigGAN import Generator
 from Dataset import sampled_ssgan
+from Training import train_fns
+
+
+def sample_with_embed(G, embed, z_, y_, config):
+  with torch.no_grad():
+    z_.sample_()
+    y_.sample_()
+    if config['parallel']:
+      w = nn.parallel.data_parallel(embed, z_)
+      G_z =  nn.parallel.data_parallel(G, (w, G.shared(y_)))
+    else:
+      w = embed(z_)
+      G_z = G(w, G.shared(y_))
+    return G_z, y_
 
 
 # The main training file. Config is a dictionary specifying the configuration
@@ -88,9 +102,11 @@ def run(config):
     def __init__(self):
       super(Wrapper, self).__init__()
       self.G = G
+      self.MSE = torch.nn.MSELoss(reduction='mean')
 
-    def forward(self, z, y):
-      x = self.G(z, self.G.shared(y))
+    def forward(self, w, y, img):
+      x = self.G(w, self.G.shared(y))
+      x = self.MSE(x, img)
       return x
 
   W = Wrapper()
@@ -119,16 +135,19 @@ def run(config):
 
   get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'], config['parallel'],
                                                                     config['data_root'], config['no_fid'])
-  G_batch_size = max(config['G_batch_size'], config['batch_size'])
-  fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
+  z_, y_ = utils.prepare_z_y(config['batch_size'], G.dim_z,
+                            config['n_classes'], device=device,
+                            fp16=config['G_fp16'])
+  fixed_w, fixed_y = utils.prepare_z_y(config['batch_size'], G.dim_z,
                                        config['n_classes'], device=device,
                                        fp16=config['G_fp16'])
-  fixed_z.sample_()
+  fixed_w.sample_()
   fixed_y.sample_()
 
-  def train(z, img):
+  def train(w, img):
+    y_.sample_()
     G.optim.zero_grad()
-    loss = W(z, img)
+    loss = W(w, y_, img)
     loss.backward()
     if config['E_ortho'] > 0.0:
       # Debug print to indicate we're using ortho reg in D.
@@ -138,8 +157,27 @@ def run(config):
     out = {'loss': float(loss.item())}
     if config['ema']:
       ema.update(state_dict['itr'])
-    del z, img, loss
+    del w, img, loss
     return out
+
+  class Embed(nn.Module):
+    def __init__(self):
+      super(Embed, self).__init__()
+      embed = np.load('/ghome/fengrl/home/FGAN/embed.npy')
+      self.embed = torch.tensor(embed, requires_grad=False)
+
+    def forward(self, z):
+      z = torch.matmul(z, self.embed)
+      return z
+
+  embedding = Embed()
+  fixed_w = torch.matmul(fixed_w, embedding.embed)
+
+  sample = functools.partial(sample_with_embed,
+                             embed=embedding,
+                             G=(G_ema if config['ema'] and config['use_ema']
+                                else G),
+                             z_=z_, y_=y_, config=config)
 
   start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'])
   print('Beginning training at epoch %d...' % state_dict['epoch'])
@@ -162,8 +200,8 @@ def run(config):
         G.train()
         if config['ema']:
           G_ema.train()
-        img, z = img.to(device), z.to(device)
-        metrics = train(z, img)
+        img, w = img.to(device), w.to(device)
+        metrics = train(w, img)
         train_log.log(itr=int(state_dict['itr']), **metrics)
 
         # Every sv_log_interval, log singular values
@@ -181,10 +219,18 @@ def run(config):
         if not (state_dict['itr'] % config['save_every']):
           if config['G_eval_mode']:
             print('Switchin e to eval mode...')
-            E.eval()
+            G.eval()
             if config['ema']:
-              E_ema.eval()
-          sampled_ssgan.save_and_eavl(E, Out, E_ema, O_ema, state_dict, config, experiment_name, eval_fn, test_log)
+              G_ema.eval()
+          train_fns.save_and_sample(G, None, G_ema, z_, y_, fixed_w, fixed_y,
+                                    state_dict, config, experiment_name)
+          # Test every specified interval
+        if not (state_dict['itr'] % config['test_every']):
+          if config['G_eval_mode']:
+            print('Switchin G to eval mode...')
+            G.eval()
+          train_fns.test(G, None, G_ema, z_, y_, state_dict, config, sample,
+                         get_inception_metrics, experiment_name, test_log)
       del loader, pbar
     #  Increment epoch counter at end of epoch
     state_dict['epoch'] += 1

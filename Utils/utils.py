@@ -787,10 +787,11 @@ def save_weights(G, D, state_dict, weights_root, experiment_name,
               '%s/%s.pth' % (root, join_strings('_', ['G', name_suffix])))
   torch.save(G.optim.state_dict(), 
               '%s/%s.pth' % (root, join_strings('_', ['G_optim', name_suffix])))
-  torch.save(D.state_dict(), 
-              '%s/%s.pth' % (root, join_strings('_', ['D', name_suffix])))
-  torch.save(D.optim.state_dict(),
-              '%s/%s.pth' % (root, join_strings('_', ['D_optim', name_suffix])))
+  if D is not None:
+    torch.save(D.state_dict(),
+                '%s/%s.pth' % (root, join_strings('_', ['D', name_suffix])))
+    torch.save(D.optim.state_dict(),
+                '%s/%s.pth' % (root, join_strings('_', ['D_optim', name_suffix])))
   torch.save(state_dict,
               '%s/%s.pth' % (root, join_strings('_', ['state_dict', name_suffix])))
   if G_ema is not None:
