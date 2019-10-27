@@ -508,7 +508,7 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
         del x, y
     del loss_fn
     dense_eval.init_weight()
-    return loss
+    return loss / sample_batch
 
 
 
