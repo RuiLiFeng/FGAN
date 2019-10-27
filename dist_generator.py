@@ -148,7 +148,7 @@ def run(config):
   def train(w, img):
     y_.sample_()
     G.optim.zero_grad()
-    loss = W(w, y_, img)
+    loss = W(w, y_, img).sum()
     loss.backward()
     if config['E_ortho'] > 0.0:
       # Debug print to indicate we're using ortho reg in D.
