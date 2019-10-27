@@ -166,14 +166,14 @@ def run(config):
     def __init__(self):
       super(Embed, self).__init__()
       embed = np.load('/ghome/fengrl/home/FGAN/embed_ema.npy')
-      self.embed = torch.tensor(embed, requires_grad=False)
+      self.embed = torch.tensor(embed, requires_grad=False).to(device)
 
     def forward(self, z):
       z = torch.matmul(z, self.embed)
       return z
 
   embedding = Embed().to(device)
-  fixed_w = torch.matmul(fixed_w, embedding.embed.to(device))
+  fixed_w = torch.matmul(fixed_w, embedding.embed)
 
   sample = functools.partial(sample_with_embed,
                              embed=embedding,
