@@ -462,7 +462,7 @@ class dense_eval(nn.Module):
         return x
 
 
-def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10):
+def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10, device='cuda'):
     loss_fn = nn.CrossEntropyLoss(reduction='mean')
     optim = torch.optim.Adam(params=dense_eval.parameters(), lr=0.001)
 
@@ -489,6 +489,8 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
     for i, (x, y) in enumerate(loader):
         if i > dense_eval.steps:
             break
+        x = x.to(device)
+        y = y.to(device)
         train(x, y)
         del x, y
     del optim, loss_fn
@@ -498,6 +500,8 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
         if i > sample_batch:
             break
         with torch.no_grad():
+            x = x.to(device)
+            y = y.to(device)
             loss += model(x, y) / x.shape[0]
         del x, y
     return loss

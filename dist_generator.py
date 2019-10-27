@@ -19,6 +19,7 @@ from Metric import inception_utils
 from Utils import utils, vae_utils
 from sync_batchnorm import patch_replication_callback
 from Network.VaeGAN.Encoder import Encoder
+from Network.BigGAN.BigGAN import Generator
 from Dataset import sampled_ssgan
 
 
@@ -57,25 +58,20 @@ def run(config):
   print('Experiment name is %s' % experiment_name)
 
   # Next, build the model
-  E = Encoder(**{**config, 'arch': 'default'}).to(device)
-  Out = Encoder(**{**config, 'arch': 'out'}).to(device)
+  G = Generator(**config).to(device)
 
   # If using EMA, prepare it
   if config['ema']:
     print('Preparing EMA for G with decay of {}'.format(config['ema_decay']))
-    E_ema = Encoder(**{**config, 'skip_init':True,
-                       'no_optim': True, 'arch': 'default'}).to(device)
-    O_ema = Encoder(**{**config, 'skip_init':True,
-                       'no_optim': True, 'arch': 'out'}).to(device)
-    eema = utils.ema(E, E_ema, config['ema_decay'], config['ema_start'])
-    oema = utils.ema(Out, O_ema, config['ema_decay'], config['ema_start'])
+    G_ema = Generator(**{**config, 'skip_init':True,
+                       'no_optim': True}).to(device)
+    ema = utils.ema(G, G_ema, config['ema_decay'], config['ema_start'])
   else:
-    E_ema, eema, O_ema, oema = None, None, None, None
+    G_ema, ema = None, None
 
-  print(E)
-  print(Out)
+  print(G)
   print('Number of params in E: {}'.format(
-    *[sum([p.data.nelement() for p in net.parameters()]) for net in [E, Out]]))
+    *[sum([p.data.nelement() for p in net.parameters()]) for net in [G]]))
   # Prepare state dict, which holds things like epoch # and itr #
   state_dict = {'itr': 0, 'epoch': 0, 'save_num': 0, 'save_best_num': 0,
                 'best_IS': 0, 'best_FID': 999999, 'config': config, 'best_precision': 0.0}
@@ -83,20 +79,18 @@ def run(config):
   # If loading from a pre-trained model, load weights
   if config['resume']:
     print('Loading weights...')
-    vae_utils.load_weights([E, Out], state_dict,
+    vae_utils.load_weights([G], state_dict,
                            config['weights_root'], experiment_name,
                            config['load_weights'] if config['load_weights'] else None,
-                           [E_ema, O_ema] if config['ema'] else [None])
+                           [G_ema] if config['ema'] else [None])
 
   class Wrapper(nn.Module):
     def __init__(self):
       super(Wrapper, self).__init__()
-      self.E = E
-      self.O = Out
+      self.G = G
 
-    def forward(self, x):
-      x = self.E(x)
-      x = self.O(x)
+    def forward(self, z, y):
+      x = self.G(z, self.G.shared(y))
       return x
 
   W = Wrapper()
@@ -123,31 +117,28 @@ def run(config):
   # Write metadata
   utils.write_metadata(config['logs_root'], experiment_name, config, state_dict)
 
-  eval_loader = utils.get_data_loaders(**{**config,'load_in_memory': False})
-  dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=10).to(device)
-  eval_fn = functools.partial(vae_utils.eval_encoder, sample_batch=10,
-                              config=config, loader=eval_loader,
-                              dense_eval=dense_eval, device=device)
+  get_inception_metrics = inception_utils.prepare_inception_metrics(config['dataset'], config['parallel'],
+                                                                    config['data_root'], config['no_fid'])
+  G_batch_size = max(config['G_batch_size'], config['batch_size'])
+  fixed_z, fixed_y = utils.prepare_z_y(G_batch_size, G.dim_z,
+                                       config['n_classes'], device=device,
+                                       fp16=config['G_fp16'])
+  fixed_z.sample_()
+  fixed_y.sample_()
 
-
-  def train(w, img):
-    E.optim.zero_grad()
-    Out.optim.zero_grad()
-    w_ = W(img)
-    loss = F.mse_loss(w_, w, reduction='sum')
+  def train(z, img):
+    G.optim.zero_grad()
+    loss = W(z, img)
     loss.backward()
     if config['E_ortho'] > 0.0:
       # Debug print to indicate we're using ortho reg in D.
       print('using modified ortho reg in E')
-      utils.ortho(E, config['E_ortho'])
-      utils.ortho(Out, config['E_ortho'])
-    E.optim.step()
-    Out.optim.step()
+      utils.ortho(G, config['G_ortho'])
+    G.optim.step()
     out = {'loss': float(loss.item())}
     if config['ema']:
-      for ema in [eema, oema]:
-        ema.update(state_dict['itr'])
-    del w, img, w_, loss
+      ema.update(state_dict['itr'])
+    del z, img, loss
     return out
 
   start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'])
@@ -168,19 +159,17 @@ def run(config):
         state_dict['itr'] += 1
         # Make sure G and D are in training mode, just in case they got set to eval
         # For D, which typically doesn't have BN, this shouldn't matter much.
-        E.train()
-        Out.train()
+        G.train()
         if config['ema']:
-          E_ema.train()
-          O_ema.train()
-        img, w = img.to(device), w.to(device)
-        metrics = train(img, w)
+          G_ema.train()
+        img, z = img.to(device), z.to(device)
+        metrics = train(z, img)
         train_log.log(itr=int(state_dict['itr']), **metrics)
 
         # Every sv_log_interval, log singular values
         if (config['sv_log_interval'] > 0) and (not (state_dict['itr'] % config['sv_log_interval'])):
           train_log.log(itr=int(state_dict['itr']),
-                        **{**utils.get_SVs(E, 'E'), **utils.get_SVs(Out, 'Out')})
+                        **{**utils.get_SVs(G, 'G')})
 
         # If using my progbar, print metrics.
         if config['pbar'] == 'mine':
