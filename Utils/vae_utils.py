@@ -471,12 +471,11 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
             with torch.no_grad():
                 x = nn.parallel.data_parallel(Encoder, x)
             x = nn.parallel.data_parallel(dense_eval, x.flatten(1))
-            loss = torch.nn.parallel.data_parallel(loss_fn, (x, y))
         else:
             with torch.no_grad():
                 x = Encoder(x).flatten(1)
             x = dense_eval(x)
-            loss = loss_fn(x)
+        loss = loss_fn(x, y)
         return loss
 
     def train(x, y):
