@@ -72,10 +72,12 @@ class SSGAN_HDF5(data.Dataset):
         # return len(self.f['imgs'])
 
 
-def make_dset_range(root, piece=6):
+def make_dset_range(root, piece=6, batch_size=64):
     with h5.File(root, 'r') as f:
         num_samples = len(f['z'])
-    per_set_num = num_samples // piece
+    batch_num = num_samples // batch_size
+    per_set_batch = batch_num // piece
+    per_set_num = per_set_batch * batch_size
     start = []
     end = []
     for i in range(piece):

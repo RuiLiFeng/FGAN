@@ -156,7 +156,7 @@ def run(config):
       utils.ortho(G, config['G_ortho'])
     G.optim.step()
     G_scheduler.step(loss)
-    out = {'loss': float(loss.item())}
+    out = {' loss': float(loss.item())}
     if config['ema']:
       ema.update(state_dict['itr'])
     del w, img, loss, x
@@ -181,15 +181,14 @@ def run(config):
                                 else G),
                              z_=z_, y_=y_, config=config)
 
-  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'])
+  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'], config['batch_size'])
   print('Beginning training at epoch %d...' % state_dict['epoch'])
   # Train for specified number of epochs, although we mostly track G iterations.
   for epoch in range(state_dict['epoch'], config['num_epochs']):
     for piece in range(config['ssgan_piece']):
       print('Load %d-th piece of ssgan sample into memory...' % piece)
       loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'start_itr': state_dict['itr'],
-                                                        'start': start[piece], 'end': end[piece],
-                                                        'drop_last': True})
+                                                        'start': start[piece], 'end': end[piece]})
       # Which progressbar to use? TQDM or my own?
       if config['pbar'] == 'mine':
         pbar = utils.progress(loader, displaytype='eta')

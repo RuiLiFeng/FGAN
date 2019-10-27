@@ -147,14 +147,14 @@ def run(config):
     Out.optim.step()
     E_scheduler.step(loss)
     O_scheduler.step(loss)
-    out = {'loss': float(loss.item())}
+    out = {' loss': float(loss.item())}
     if config['ema']:
       for ema in [eema, oema]:
         ema.update(state_dict['itr'])
     del w, img, w_, loss
     return out
 
-  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'])
+  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'], config['batch_size'])
   print('Beginning training at epoch %d...' % state_dict['epoch'])
   # Train for specified number of epochs, although we mostly track G iterations.
   for epoch in range(state_dict['epoch'], config['num_epochs']):
