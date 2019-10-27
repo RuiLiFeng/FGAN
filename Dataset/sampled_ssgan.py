@@ -60,6 +60,7 @@ class SSGAN_HDF5(data.Dataset):
         # img = self.transform(img)
         # Apply my own transform
         img = (torch.from_numpy(img).float() - 0.5) * 2
+        img = img.permute([2, 0, 1])
         z = torch.from_numpy(z).float()
         w = torch.from_numpy(w).float()
 
