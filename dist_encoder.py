@@ -178,7 +178,7 @@ def run(config):
           E_ema.train()
           O_ema.train()
         img, w = img.to(device), w.to(device)
-        metrics = train(img, w)
+        metrics = train(w, img)
         train_log.log(itr=int(state_dict['itr']), **metrics)
 
         # Every sv_log_interval, log singular values
