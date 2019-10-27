@@ -30,6 +30,7 @@ class SSGAN_HDF5(data.Dataset):
             with h5.File(root, 'r') as f:
                 self.img = f['img'][start: end]
                 self.z = f['z'][start: end]
+            with h5.File(root.replace('SSGAN128', 'wema'), 'r') as f:
                 self.w = f['w'][start: end]
 
     def __getitem__(self, index):
@@ -52,6 +53,8 @@ class SSGAN_HDF5(data.Dataset):
                 img = f['img'][index]
                 z = f['z'][index]
                 w = f['w'][index]
+            with h5.File(self.root.replace('SSGAN128', 'wema'), 'r') as f:
+                self.w = f['w'][index]
 
         # if self.transform is not None:
         # img = self.transform(img)
