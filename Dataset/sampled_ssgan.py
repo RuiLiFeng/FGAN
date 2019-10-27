@@ -13,7 +13,7 @@ class SSGAN_HDF5(data.Dataset):
                  val_split=0, **kwargs):  # last four are dummies
 
         self.root = root
-        self.num_imgs = len(h5.File(root, 'r')['z'])
+        self.num_imgs = end - start
 
         # self.transform = transform
         self.target_transform = target_transform
