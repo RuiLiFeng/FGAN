@@ -88,7 +88,7 @@ def run(config):
     *[sum([p.data.nelement() for p in net.parameters()]) for net in [G]]))
   # Prepare state dict, which holds things like epoch # and itr #
   state_dict = {'itr': 0, 'epoch': 0, 'save_num': 0, 'save_best_num': 0,
-                'best_IS': 0, 'best_FID': 999999, 'config': config, 'best_precision': 0.0}
+                'best_IS': 0, 'best_FID': 999999, 'config': config, 'best_precise': 0.0}
 
   # If loading from a pre-trained model, load weights
   if config['resume']:

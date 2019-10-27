@@ -78,7 +78,7 @@ def run(config):
     *[sum([p.data.nelement() for p in net.parameters()]) for net in [E, Out]]))
   # Prepare state dict, which holds things like epoch # and itr #
   state_dict = {'itr': 0, 'epoch': 0, 'save_num': 0, 'save_best_num': 0,
-                'best_IS': 0, 'best_FID': 999999, 'config': config, 'best_precision': 0.0}
+                'best_IS': 0, 'best_FID': 999999, 'config': config, 'best_precise': 0.0}
 
   # If loading from a pre-trained model, load weights
   if config['resume']:
@@ -124,7 +124,7 @@ def run(config):
   utils.write_metadata(config['logs_root'], experiment_name, config, state_dict)
 
   eval_loader = utils.get_data_loaders(**{**config, 'load_in_mem': False, 'use_multiepoch_sampler': False})[0]
-  dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=10).to(device)
+  dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=5).to(device)
   eval_fn = functools.partial(vae_utils.eval_encoder, sample_batch=10,
                               config=config, loader=eval_loader,
                               dense_eval=dense_eval, device=device)
