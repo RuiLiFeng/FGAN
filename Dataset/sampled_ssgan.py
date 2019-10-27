@@ -26,7 +26,7 @@ class SSGAN_HDF5(data.Dataset):
 
         # If loading into memory, do so now
         if self.load_in_mem:
-            print('Loading %s into memory...' % root)
+            print('Loading %s into memory, index range from %d to %d...' % (root, start, end))
             with h5.File(root, 'r') as f:
                 self.img = f['img'][start: end]
                 self.z = f['z'][start: end]
