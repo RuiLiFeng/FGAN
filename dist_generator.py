@@ -141,7 +141,7 @@ def run(config):
                                        fp16=config['G_fp16'])
   fixed_w.sample_()
   fixed_y.sample_()
-  G_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(G.optim, mode='min', factor=0.5)
+  G_scheduler = torch.optim.lr_scheduler.StepLR(G.optim, step_size=1, gamma=0.1)
   MSE = torch.nn.MSELoss(reduction='mean')
 
   def train(w, img):
@@ -155,25 +155,28 @@ def run(config):
       print('using modified ortho reg in E')
       utils.ortho(G, config['G_ortho'])
     G.optim.step()
-    G_scheduler.step(loss)
     out = {' loss': float(loss.item())}
     if config['ema']:
       ema.update(state_dict['itr'])
-    del w, img, loss, x
+    del loss, x
     return out
 
   class Embed(nn.Module):
     def __init__(self):
       super(Embed, self).__init__()
       embed = np.load('/ghome/fengrl/home/FGAN/embed_ema.npy')
-      self.embed = torch.tensor(embed, requires_grad=False).to(device)
+      self.dense = nn.Linear(120, 120, bias=False)
+      self.embed = torch.tensor(embed, requires_grad=False)
+      self.dense.load_state_dict({'weight': self.embed})
+      for param in self.dense.parameters():
+        param.requires_grad = False
 
     def forward(self, z):
-      z = torch.matmul(z, self.embed)
+      z = self.dense(z)
       return z
 
   embedding = Embed().to(device)
-  fixed_w = torch.matmul(fixed_w, embedding.embed)
+  fixed_w = embedding(fixed_w)
 
   sample = functools.partial(sample_with_embed,
                              embed=embedding,
@@ -181,13 +184,16 @@ def run(config):
                                 else G),
                              z_=z_, y_=y_, config=config)
 
-  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'], config['batch_size'])
+  batch_size = config['batch_size'] * config['num_D_steps'] * config['num_D_accumulations']
+
+  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'], batch_size)
   print('Beginning training at epoch %d...' % state_dict['epoch'])
   # Train for specified number of epochs, although we mostly track G iterations.
   for epoch in range(state_dict['epoch'], config['num_epochs']):
     for piece in range(config['ssgan_piece']):
       print('Load %d-th piece of ssgan sample into memory...' % piece)
-      loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'start_itr': state_dict['itr'],
+      loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'batch_size': batch_size,
+                                                        'start_itr': state_dict['itr'],
                                                         'start': start[piece], 'end': end[piece]})
       # Which progressbar to use? TQDM or my own?
       if config['pbar'] == 'mine':
@@ -202,8 +208,14 @@ def run(config):
         G.train()
         if config['ema']:
           G_ema.train()
+
         img, w = img.to(device), w.to(device)
-        metrics = train(w, img)
+        img = torch.split(img, config['batch_size'])
+        w = torch.split(w, config['batch_size'])
+        counter = 0
+        metrics = train(w[counter], img[counter])
+        counter += 1
+        del img, w
         train_log.log(itr=int(state_dict['itr']), **metrics)
 
         # Every sv_log_interval, log singular values
@@ -236,6 +248,7 @@ def run(config):
       del loader, pbar
     #  Increment epoch counter at end of epoch
     state_dict['epoch'] += 1
+    G_scheduler.step()
 
 
 def main():

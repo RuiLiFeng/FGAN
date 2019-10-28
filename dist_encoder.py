@@ -122,6 +122,8 @@ def run(config):
                              logstyle=config['logstyle'])
   # Write metadata
   utils.write_metadata(config['logs_root'], experiment_name, config, state_dict)
+  # Batch size for dataloader, prefetch 8 times batch
+  batch_size = config['batch_size'] * config['num_D_steps'] * config['num_D_accumulations']
 
   eval_loader = utils.get_data_loaders(**{**config, 'load_in_mem': False, 'use_multiepoch_sampler': False})[0]
   dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=5).to(device)
@@ -129,8 +131,8 @@ def run(config):
                               config=config, loader=eval_loader,
                               dense_eval=dense_eval, device=device)
 
-  E_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(E.optim, mode='min', factor=0.5)
-  O_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(Out.optim, mode='min', factor=0.5)
+  E_scheduler = torch.optim.lr_scheduler.StepLR(E.optim, step_size=1, gamma=0.1)
+  O_scheduler = torch.optim.lr_scheduler.StepLR(Out.optim, step_size=1, gamma=0.1)
 
   def train(w, img):
     E.optim.zero_grad()
@@ -145,22 +147,24 @@ def run(config):
       utils.ortho(Out, config['E_ortho'])
     E.optim.step()
     Out.optim.step()
-    E_scheduler.step(loss)
-    O_scheduler.step(loss)
-    out = {' loss': float(loss.item())}
+    out = {' loss': float(loss.item()),
+           'lr': float(E_scheduler.get_lr())}
     if config['ema']:
       for ema in [eema, oema]:
         ema.update(state_dict['itr'])
-    del w, img, w_, loss
+    del w_, loss
     return out
 
-  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'], config['batch_size'])
+
+
+  start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'], batch_size)
   print('Beginning training at epoch %d...' % state_dict['epoch'])
   # Train for specified number of epochs, although we mostly track G iterations.
   for epoch in range(state_dict['epoch'], config['num_epochs']):
     for piece in range(config['ssgan_piece']):
       print('Load %d-th piece of ssgan sample into memory...' % piece)
-      loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'start_itr': state_dict['itr'],
+      loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'batch_size': batch_size,
+                                                        'start_itr': state_dict['itr'],
                                                         'start': start[piece], 'end': end[piece]})
       # Which progressbar to use? TQDM or my own?
       if config['pbar'] == 'mine':
@@ -177,8 +181,15 @@ def run(config):
         if config['ema']:
           E_ema.train()
           O_ema.train()
+
         img, w = img.to(device), w.to(device)
-        metrics = train(w, img)
+        counter = 0
+        img = torch.split(img, config['batch_size'])
+        w = torch.split(w, config['batch_size'])
+        metrics = train(w[counter], img[counter])
+        counter += 1
+        del img, w
+
         train_log.log(itr=int(state_dict['itr']), **metrics)
 
         # Every sv_log_interval, log singular values
@@ -203,6 +214,8 @@ def run(config):
       del loader, pbar
     #  Increment epoch counter at end of epoch
     state_dict['epoch'] += 1
+    E_scheduler.step()
+    O_scheduler.step()
 
 
 def main():

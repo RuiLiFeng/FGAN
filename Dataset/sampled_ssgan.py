@@ -87,11 +87,11 @@ def make_dset_range(root, piece=6, batch_size=64):
     return start, end
 
 
-def get_SSGAN_sample_loader(ssgan_sample_root, start, end, batch_size=64, shuffle=True, num_workers=8,
-                            load_in_memory=True, pin_memory=True,
+def get_SSGAN_sample_loader(ssgan_sample_root, start, end, batch_size=64, shuffle=False, num_workers=8,
+                            load_in_mem=True, pin_memory=True,
                             drop_last=True, **kwargs):
     print('Using SSGAN sample location % s' % ssgan_sample_root)
-    dset = SSGAN_HDF5(ssgan_sample_root, start, end, load_in_mem=load_in_memory)
+    dset = SSGAN_HDF5(ssgan_sample_root, start, end, load_in_mem=load_in_mem)
     loader_kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory, 'drop_last': drop_last}
     loader = DataLoader(dset, batch_size=batch_size, shuffle=shuffle, **loader_kwargs)
     return loader

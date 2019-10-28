@@ -492,7 +492,11 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
             break
         x = x.to(device)
         y = y.to(device)
-        train(x, y)
+        x = torch.split(x, config['batch_size'])
+        y = torch.split(y, config['batch_size'])
+        counter = 0
+        train(x[counter], y[counter])
+        counter += 1
         del x, y
     del optim
 
@@ -504,7 +508,11 @@ def eval_encoder(Encoder, loader, dense_eval: nn.Module, config, sample_batch=10
         with torch.no_grad():
             x = x.to(device)
             y = y.to(device)
-            loss += model(x, y) / x.shape[0]
+            x = torch.split(x, config['batch_size'])
+            y = torch.split(y, config['batch_size'])
+            counter = 0
+            loss += model(x[counter], y[counter]) / x[counter].shape[0]
+            counter += 1
         del x, y
     del loss_fn
     dense_eval.init_weight()
