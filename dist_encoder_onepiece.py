@@ -125,8 +125,8 @@ def run(config):
   # Batch size for dataloader, prefetch 8 times batch
   batch_size = config['batch_size'] * config['num_D_steps'] * config['num_D_accumulations']
 
-  eval_loader = utils.get_data_loaders(**{**config, 'load_in_mem': False, 'use_multiepoch_sampler': False})[0]
-  dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=5).to(device)
+  # eval_loader = utils.get_data_loaders(**{**config, 'load_in_mem': False, 'use_multiepoch_sampler': False})[0]
+  # dense_eval = vae_utils.dense_eval(2048, config['n_classes'], steps=5).to(device)
   # eval_fn = functools.partial(vae_utils.eval_encoder, sample_batch=10,
   #                             config=config, loader=eval_loader,
   #                             dense_eval=dense_eval, device=device)
