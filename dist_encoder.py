@@ -131,8 +131,8 @@ def run(config):
                               config=config, loader=eval_loader,
                               dense_eval=dense_eval, device=device)
 
-  E_scheduler = torch.optim.lr_scheduler.StepLR(E.optim, step_size=1, gamma=0.1)
-  O_scheduler = torch.optim.lr_scheduler.StepLR(Out.optim, step_size=1, gamma=0.1)
+  E_scheduler = torch.optim.lr_scheduler.StepLR(E.optim, step_size=2, gamma=0.1)
+  O_scheduler = torch.optim.lr_scheduler.StepLR(Out.optim, step_size=2, gamma=0.1)
 
   def train(w, img):
     E.optim.zero_grad()
@@ -165,12 +165,12 @@ def run(config):
       loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'batch_size': batch_size,
                                                         'start_itr': state_dict['itr'],
                                                         'start': start[piece], 'end': end[piece]})
-      # Which progressbar to use? TQDM or my own?
-      if config['pbar'] == 'mine':
-        pbar = utils.progress(loader, displaytype='eta')
-      else:
-        pbar = tqdm(loader)
       for _ in range(200):
+        # Which progressbar to use? TQDM or my own?
+        if config['pbar'] == 'mine':
+          pbar = utils.progress(loader, displaytype='eta')
+        else:
+          pbar = tqdm(loader)
         for i, (img, z, w) in enumerate(pbar):
           # Increment the iteration counter
           state_dict['itr'] += 1

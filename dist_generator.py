@@ -144,7 +144,7 @@ def run(config):
                                        fp16=config['G_fp16'])
   fixed_w.sample_()
   fixed_y.sample_()
-  G_scheduler = torch.optim.lr_scheduler.StepLR(G.optim, step_size=1, gamma=0.1)
+  G_scheduler = torch.optim.lr_scheduler.StepLR(G.optim, step_size=2, gamma=0.1)
   MSE = torch.nn.MSELoss(reduction='mean')
 
   def train(w, img):
@@ -198,12 +198,12 @@ def run(config):
       loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'batch_size': batch_size,
                                                         'start_itr': state_dict['itr'],
                                                         'start': start[piece], 'end': end[piece]})
-      # Which progressbar to use? TQDM or my own?
-      if config['pbar'] == 'mine':
-        pbar = utils.progress(loader, displaytype='eta')
-      else:
-        pbar = tqdm(loader)
       for _ in range(150):
+        # Which progressbar to use? TQDM or my own?
+        if config['pbar'] == 'mine':
+          pbar = utils.progress(loader, displaytype='eta')
+        else:
+          pbar = tqdm(loader)
         for i, (img, z, w) in enumerate(pbar):
           # Increment the iteration counter
           state_dict['itr'] += 1
