@@ -131,8 +131,8 @@ def run(config):
                               config=config, loader=eval_loader,
                               dense_eval=dense_eval, device=device)
 
-  E_scheduler = torch.optim.lr_scheduler.StepLR(E.optim, step_size=1, gamma=0.1)
-  O_scheduler = torch.optim.lr_scheduler.StepLR(Out.optim, step_size=1, gamma=0.1)
+  E_scheduler = torch.optim.lr_scheduler.StepLR(E.optim, step_size=50, gamma=0.1)
+  O_scheduler = torch.optim.lr_scheduler.StepLR(Out.optim, step_size=50, gamma=0.1)
 
   def train(w, img):
     E.optim.zero_grad()

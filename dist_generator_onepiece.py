@@ -141,7 +141,7 @@ def run(config):
                                        fp16=config['G_fp16'])
   fixed_w.sample_()
   fixed_y.sample_()
-  G_scheduler = torch.optim.lr_scheduler.StepLR(G.optim, step_size=1, gamma=0.1)
+  G_scheduler = torch.optim.lr_scheduler.StepLR(G.optim, step_size=50, gamma=0.1)
   MSE = torch.nn.MSELoss(reduction='mean')
 
   def train(w, img):
