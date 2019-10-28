@@ -22,6 +22,7 @@ from sync_batchnorm import patch_replication_callback
 from Network.BigGAN.BigGAN import Generator
 from Dataset import sampled_ssgan
 from Training import train_fns
+from train_encoder import load_pretrained
 
 
 def sample_with_embed(G, embed, z_, y_, config):
@@ -72,7 +73,9 @@ def run(config):
   print('Experiment name is %s' % experiment_name)
 
   # Next, build the model
-  G = Generator(**config).to(device)
+  # G = Generator(**config).to(device)
+  G = Generator(**{**config, 'skip_init': True, 'no_optim': True}).to(device)
+  load_pretrained(G, config['pretrained_G_dir'])
 
   # If using EMA, prepare it
   if config['ema']:
