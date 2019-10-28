@@ -156,13 +156,8 @@ class Encoder_out_layer(nn.Module):
     def __init__(self, dim_z, skip_init=False, E_lr=2e-4, E_init='ortho', widden_factor=2,
                  adam_eps=1e-8, E_B1=0.0, E_B2=0.999, E_mixed_precision=False, name=None, **kwargs):
         super(Encoder_out_layer, self).__init__()
-        self.downsample = nn.Sequential(
-            nn.Conv2d(512 * 4, dim_z, kernel_size=1, stride=1, bias=False),
-            nn.BatchNorm2d(dim_z))
-        self.out_layer = nn.Sequential(
-            nn.Linear(dim_z, dim_z),
-            nn.ReLU(inplace=True)
-        )
+        self.dense = nn.Linear(2048, dim_z)
+
         self.init = E_init
         if not skip_init:
             self.init_weights()
@@ -198,9 +193,8 @@ class Encoder_out_layer(nn.Module):
         print('Param count for Encoder_out_layer''s initialized parameters: %d' % self.param_count)
 
     def forward(self, x):
-        x = self.downsample(x)
         x = torch.flatten(x, 1)
-        x = self.out_layer(x)
+        x = self.dense(x)
         return x
 
 
