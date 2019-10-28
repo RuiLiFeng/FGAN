@@ -7,7 +7,7 @@ import os
 from Utils import utils, vae_utils
 
 
-class SSGAN_HDF5(data.Dataset):
+class SSGAN_HDF5_slice(data.Dataset):
     def __init__(self, root, start=0, end=-1, transform=None, target_transform=None,
                  load_in_mem=False, train=True, download=False, validate_seed=0,
                  val_split=0, **kwargs):  # last four are dummies
@@ -72,6 +72,72 @@ class SSGAN_HDF5(data.Dataset):
         # return len(self.f['imgs'])
 
 
+class SSGAN_HDF5(data.Dataset):
+    def __init__(self, root, transform=None, target_transform=None,
+                 load_in_mem=False, train=True, download=False, validate_seed=0,
+                 val_split=0, **kwargs):  # last four are dummies
+
+        self.root = root
+        with h5.File(root, 'r') as f:
+            self.num_imgs = len(f['z'])
+
+        # self.transform = transform
+        self.target_transform = target_transform
+
+        # Set the transform here
+        self.transform = transform
+
+        # load the entire dataset into memory?
+        self.load_in_mem = load_in_mem
+
+        # If loading into memory, do so now
+        if self.load_in_mem:
+            print('Loading %s into memory...' % root)
+            with h5.File(root, 'r') as f:
+                self.img = f['img'][:]
+                self.z = f['z'][:]
+            with h5.File(root.replace('SSGAN128', 'wema'), 'r') as f:
+                self.w = f['w'][:]
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+
+        Returns:
+            tuple: (image, target) where target is class_index of the target class.
+        """
+        # If loaded the entire dataset in RAM, get image from memory
+        if self.load_in_mem:
+            img = self.img[index]
+            z = self.z[index]
+            w = self.w[index]
+
+        # Else load it from disk
+        else:
+            with h5.File(self.root, 'r') as f:
+                img = f['img'][index]
+                z = f['z'][index]
+                w = f['w'][index]
+            with h5.File(self.root.replace('SSGAN128', 'wema'), 'r') as f:
+                self.w = f['w'][index]
+
+        # if self.transform is not None:
+        # img = self.transform(img)
+        # Apply my own transform
+        img = (torch.from_numpy(img).float() - 0.5) * 2
+        img = img.permute([2, 0, 1])
+        z = torch.from_numpy(z).float()
+        w = torch.from_numpy(w).float()
+
+        # return img, z, w
+        return img, z, w
+
+    def __len__(self):
+        return self.num_imgs
+        # return len(self.f['imgs'])
+
+
 def make_dset_range(root, piece=6, batch_size=64):
     with h5.File(root, 'r') as f:
         num_samples = len(f['z'])
@@ -87,11 +153,14 @@ def make_dset_range(root, piece=6, batch_size=64):
     return start, end
 
 
-def get_SSGAN_sample_loader(ssgan_sample_root, start, end, batch_size=64, shuffle=False, num_workers=8,
+def get_SSGAN_sample_loader(ssgan_sample_root, start=0, end=-1, is_slice=True, batch_size=64, shuffle=False, num_workers=8,
                             load_in_mem=True, pin_memory=True,
                             drop_last=True, **kwargs):
     print('Using SSGAN sample location % s' % ssgan_sample_root)
-    dset = SSGAN_HDF5(ssgan_sample_root, start, end, load_in_mem=load_in_mem)
+    if is_slice:
+        dset = SSGAN_HDF5_slice(ssgan_sample_root, start, end, load_in_mem=load_in_mem)
+    else:
+        dset = SSGAN_HDF5(ssgan_sample_root)
     loader_kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory, 'drop_last': drop_last}
     loader = DataLoader(dset, batch_size=batch_size, shuffle=shuffle, **loader_kwargs)
     return loader
