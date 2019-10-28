@@ -74,7 +74,7 @@ def run(config):
 
   # Next, build the model
   # G = Generator(**config).to(device)
-  G = Generator(**{**config, 'skip_init': True, 'no_optim': True}).to(device)
+  G = Generator(**{**config, 'skip_init': True}).to(device)
   load_pretrained(G, config['pretrained_G_dir'])
 
   # If using EMA, prepare it
