@@ -170,51 +170,47 @@ def run(config):
         pbar = utils.progress(loader, displaytype='eta')
       else:
         pbar = tqdm(loader)
-      for i, (img, z, w) in enumerate(pbar):
-        # Increment the iteration counter
-        state_dict['itr'] += 1
-        # Make sure G and D are in training mode, just in case they got set to eval
-        # For D, which typically doesn't have BN, this shouldn't matter much.
-        E.train()
-        Out.train()
-        if config['ema']:
-          E_ema.train()
-          O_ema.train()
+      for _ in range(200):
+        for i, (img, z, w) in enumerate(pbar):
+          # Increment the iteration counter
+          state_dict['itr'] += 1
+          # Make sure G and D are in training mode, just in case they got set to eval
+          # For D, which typically doesn't have BN, this shouldn't matter much.
+          E.train()
+          Out.train()
+          if config['ema']:
+            E_ema.train()
+            O_ema.train()
 
-        img, w = img.to(device), w.to(device)
-        counter = 0
-        img = torch.split(img, config['batch_size'])
-        w = torch.split(w, config['batch_size'])
-        metrics = train(w[counter], img[counter])
-        counter += 1
-        del img, w
+          img, w = img.to(device), w.to(device)
+          counter = 0
+          img = torch.split(img, config['batch_size'])
+          w = torch.split(w, config['batch_size'])
+          metrics = train(w[counter], img[counter])
+          counter += 1
+          del img, w
 
-        train_log.log(itr=int(state_dict['itr']), **metrics)
+          train_log.log(itr=int(state_dict['itr']), **metrics)
 
-        # Every sv_log_interval, log singular values
-        if (config['sv_log_interval'] > 0) and (not (state_dict['itr'] % config['sv_log_interval'])):
-          train_log.log(itr=int(state_dict['itr']),
-                        **{**utils.get_SVs(E, 'E'), **utils.get_SVs(Out, 'Out')})
+          # If using my progbar, print metrics.
+          if config['pbar'] == 'mine':
+            print(', '.join(['itr: %d' % state_dict['itr']]
+                            + ['%s : %+4.3f' % (key, metrics[key])
+                               for key in metrics]), end=' ')
 
-        # If using my progbar, print metrics.
-        if config['pbar'] == 'mine':
-          print(', '.join(['itr: %d' % state_dict['itr']]
-                          + ['%s : %+4.3f' % (key, metrics[key])
-                             for key in metrics]), end=' ')
-
-        # Save weights and copies as configured at specified interval
-        if not (state_dict['itr'] % config['save_every']):
-          if config['G_eval_mode']:
-            print('Switchin E to eval mode...')
-            E.eval()
-            if config['ema']:
-              E_ema.eval()
-          sampled_ssgan.save_and_eavl(E, Out, E_ema, O_ema, state_dict, config, experiment_name, eval_fn, test_log)
+          # Save weights and copies as configured at specified interval
+          if not (state_dict['itr'] % config['save_every']):
+            if config['G_eval_mode']:
+              print('Switchin E to eval mode...')
+              E.eval()
+              if config['ema']:
+                E_ema.eval()
+            sampled_ssgan.save_and_eavl(E, Out, E_ema, O_ema, state_dict, config, experiment_name, eval_fn, test_log)
+      E_scheduler.step()
+      O_scheduler.step()
       del loader, pbar
     #  Increment epoch counter at end of epoch
     state_dict['epoch'] += 1
-    E_scheduler.step()
-    O_scheduler.step()
 
 
 def main():
