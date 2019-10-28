@@ -147,8 +147,7 @@ def run(config):
       utils.ortho(Out, config['E_ortho'])
     E.optim.step()
     Out.optim.step()
-    out = {' loss': float(loss.item()),
-           'lr': float(E_scheduler.get_lr())}
+    out = {' loss': float(loss.item())}
     if config['ema']:
       for ema in [eema, oema]:
         ema.update(state_dict['itr'])
