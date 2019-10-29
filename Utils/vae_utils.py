@@ -22,6 +22,34 @@ import h5py as h5
 from tqdm import tqdm
 
 
+class Timer(object):
+    def __init__(self):
+        self._init_time = time.time()
+        self._last_update_time = self._init_time
+        self._duration = 0
+
+    def update(self):
+        cur = time.time()
+        self._duration = cur - self._last_update_time
+        self._last_update_time = cur
+
+    @property
+    def duration(self):
+        done = self._duration
+        ms = divmod(done, 60)
+        hm = divmod(ms[0], 60)
+        dh = divmod(hm[0], 24)
+        return dh + (hm[1],) + (ms[1],)
+
+    @property
+    def runing_time(self):
+        done = self._last_update_time - self._init_time
+        ms = divmod(done, 60)
+        hm = divmod(ms[0], 60)
+        dh = divmod(hm[0], 24)
+        return dh + (hm[1],) + (ms[1],)
+
+
 def SL_training_function(G, D, GD, z_, y_, ema, state_dict, config):
     def train(x, y):
         G.optim.zero_grad()

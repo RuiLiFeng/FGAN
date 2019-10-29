@@ -41,6 +41,7 @@ def sample_with_embed(G, embed, z_, y_, config):
 # The main training file. Config is a dictionary specifying the configuration
 # of this training run.
 def run(config):
+  timer = vae_utils.Timer()
 
   # Update the config dict as necessary
   # This is for convenience, to add settings derived from the user-specified
@@ -190,21 +191,19 @@ def run(config):
   batch_size = config['batch_size'] * config['num_D_steps'] * config['num_D_accumulations']
 
   start, end = sampled_ssgan.make_dset_range(config['ssgan_sample_root'], config['ssgan_piece'], batch_size)
-  print('Beginning training at epoch %d...' % state_dict['epoch'])
-  # Train for specified number of epochs, although we mostly track G iterations.
+  timer.update()
+  print('Beginning training at epoch %d (runing time %02d day %02d h %02d min %02d sec) ...' %
+        ((state_dict['epoch'],) + timer.runing_time))  # Train for specified number of epochs, although we mostly track G iterations.
   for epoch in range(state_dict['epoch'], config['num_epochs']):
     for piece in range(config['ssgan_piece']):
-      print('Load %d-th piece of ssgan sample into memory...' % piece)
+      timer.update()
+      print('Load %d-th piece of ssgan sample into memory (runing time %02d day %02d h %02d min %02d sec)...'
+            % ((piece,) + timer.runing_time))
       loader = sampled_ssgan.get_SSGAN_sample_loader(**{**config, 'batch_size': batch_size,
                                                         'start_itr': state_dict['itr'],
                                                         'start': start[piece], 'end': end[piece]})
       for _ in range(150):
-        # Which progressbar to use? TQDM or my own?
-        if config['pbar'] == 'mine':
-          pbar = utils.progress(loader, displaytype='eta')
-        else:
-          pbar = tqdm(loader)
-        for i, (img, z, w) in enumerate(pbar):
+        for i, (img, z, w) in enumerate(loader):
           # Increment the iteration counter
           state_dict['itr'] += 1
           # Make sure G and D are in training mode, just in case they got set to eval
@@ -227,11 +226,13 @@ def run(config):
             train_log.log(itr=int(state_dict['itr']),
                           **{**utils.get_SVs(G, 'G')})
 
-          # If using my progbar, print metrics.
-          if config['pbar'] == 'mine':
-            print(', '.join(['itr: %d' % state_dict['itr']]
-                            + ['%s : %+4.3f' % (key, metrics[key])
-                               for key in metrics]), end=' ')
+          if not (state_dict['itr'] % 100):
+            timer.update()
+            print("Runing time %02d day %02d h %02d min %02d sec," %
+                  timer.runing_time + ', '.join(['itr: %d' % state_dict['itr']]
+                                                + ['%s : %+4.3f' % (key, metrics[key])
+                                                   for key in metrics]))
+
 
           # Save weights and copies as configured at specified interval
           if not (state_dict['itr'] % config['save_every']):
@@ -250,7 +251,7 @@ def run(config):
             train_fns.test(G, None, G_ema, z_, y_, state_dict, config, sample,
                            get_inception_metrics, experiment_name, test_log)
       G_scheduler.step()
-      del loader, pbar
+      del loader
     #  Increment epoch counter at end of epoch
     state_dict['epoch'] += 1
 
